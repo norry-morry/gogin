@@ -15,7 +15,13 @@ RUN apk upgrade --update && \
 RUN go get -u github.com/air-verse/air && \
     go build -o /go/bin/air github.com/air-verse/air
 
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
 # note WSL環境だからか？ディレクトリを信頼できてない見たい
 RUN git config --global --add safe.directory /go/src
 
-CMD ["air", "-c", ".air.toml"]
+# expose both Gin port and Delve
+EXPOSE 8080 40000
+
+CMD ["dlv", "exec", "$(which air)", "--headless", "--listen=:40000", "--api-version=2", "--accept-multiclient", "--log"]
+#CMD ["air", "-c", ".air.toml"]

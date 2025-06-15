@@ -20,12 +20,12 @@ var migrationFilePath = "file://./migrations/"
 
 func main() {
 	fmt.Println("start migration:", time.Now())
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	var host = os.Getenv("DB_HOST")
-	fmt.Println("DB_HOST:", host)
+	Host := os.Getenv("DB_HOST")
+	fmt.Println("DB_HOST:", Host)
 	flag.Parse()
 	command := flag.Arg(0)
 	migrationFileName := flag.Arg(1)
@@ -64,13 +64,13 @@ func main() {
 func generateDsn() string {
 	var dsn string
 
-	user := os.Getenv("DB_USERNAME")
-	pass := os.Getenv("DB_PASSWORD")
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_DATABASE")
+	User := os.Getenv("DB_USER")
+	Password := os.Getenv("DB_PASS")
+	Host := os.Getenv("DB_HOST")
+	Port := os.Getenv("DB_PORT")
+	DBName := os.Getenv("DB_NAME")
 
-	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&multiStatements=true", user, pass, host, port, dbName)
+	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&multiStatements=true", User, Password, Host, Port, DBName)
 
 	return dsn
 }
