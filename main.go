@@ -4,29 +4,32 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"log"
+	"log/slog"
 	"resume/Routes"
-	"resume/library/database"
+	"resume/logger"
 )
 
 func main() {
 	getEnv := godotenv.Load()
 	if getEnv != nil {
 		fmt.Println("Error loading .env file")
-		log.Fatal("Error loading .env file")
 	}
 
-	database.InitDB()
+	//database.InitDB()
+	// リクエストログを含む各種ロガーの設定
+	log := logger.SetupLogger()
+	slog.SetDefault(log)
+	router := Routes.SetupRouter(log)
 
-	//r := gin.Default()
-	r := Routes.SetupRouter()
-	r.GET("/ping", func(c *gin.Context) {
+	// その他のミドルウェアを組込(使わないかもしれない？)
+	router.Use(gin.Recovery())
+
+	router.GET("/ping", func(c *gin.Context) {
+		slog.Debug("PingHandler called") // default logger 使用
 		c.JSON(200, gin.H{
 			"message": "Hello air! pong2",
 		})
 	})
-	err := r.Run(":8080")
-	if err != nil {
-		return
-	} // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	fmt.Println("Hello golang from docker with air!")
+	router.Run("0.0.0.0:8080") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

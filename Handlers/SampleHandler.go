@@ -1,4 +1,4 @@
-package Controllers
+package Handlers
 
 import (
 	"fmt"
@@ -8,6 +8,8 @@ import (
 
 func GetPing(c *gin.Context) {
 	fmt.Println("test")
+	//logger := slog.FromContext(c.Request.Context())
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "ping",
 	})
