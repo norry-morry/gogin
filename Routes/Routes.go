@@ -21,14 +21,6 @@ func SetupRouter(logger *slog.Logger) *gin.Engine {
 			test.GET("1", Handlers.GetTest)
 			test.GET("2", Handlers.GetTest2)
 		}
-		//user := group.Group("/user")
-		//{
-		//	user.GET("/", Handlers.GetUsers)
-		//	user.GET("/:id", Handlers.GetUserById)
-		//	user.POST("/", Handlers.CreateUser)
-		//	user.PUT("/:id", Handlers.UpdateUser)
-		//	user.DELETE("/:id", Handlers.DeleteUser)
-		//}
 	}
 	return router
 }
