@@ -2,3 +2,4 @@ tmp
 /migration/.env
 /.idea/
 /.env
+/main

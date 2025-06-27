@@ -2,29 +2,33 @@ package Routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"resume/Controllers"
-	"resume/handler"
+	"log/slog"
+	"resume/Handlers"
+	"resume/middlewares"
 )
 
-func SetupRouter() *gin.Engine {
-	r := gin.Default()
-	group := r.Group("/api")
+func SetupRouter(logger *slog.Logger) *gin.Engine {
+	router := gin.Default()
+
+	router.Use(middlewares.RequestLoggerMiddleware(logger))
+
+	group := router.Group("/api")
 	{
-		group.GET("/ping", Controllers.GetPing)
-		group.GET("/sample", Controllers.GetSample)
+		group.GET("/ping", Handlers.GetPing)
+		group.GET("/sample", Handlers.GetSample)
 		test := group.Group("/test")
 		{
-			test.GET("1", handler.GetTest)
-			test.GET("2", handler.GetTest2)
+			test.GET("1", Handlers.GetTest)
+			test.GET("2", Handlers.GetTest2)
 		}
-		user := group.Group("/user")
-		{
-			user.GET("/", handler.GetUsers)
-			user.GET("/:id", handler.GetUserById)
-			user.POST("/", handler.CreateUser)
-			user.PUT("/:id", handler.UpdateUser)
-			user.DELETE("/:id", handler.DeleteUser)
-		}
+		//user := group.Group("/user")
+		//{
+		//	user.GET("/", Handlers.GetUsers)
+		//	user.GET("/:id", Handlers.GetUserById)
+		//	user.POST("/", Handlers.CreateUser)
+		//	user.PUT("/:id", Handlers.UpdateUser)
+		//	user.DELETE("/:id", Handlers.DeleteUser)
+		//}
 	}
-	return r
+	return router
 }

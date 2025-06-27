@@ -3,6 +3,8 @@ FROM golang:1.24.4-alpine
 LABEL authors="nmori"
 
 WORKDIR /go/src
+RUN mkdir logs
+
 COPY . .
 
 RUN apk upgrade --update && \
@@ -13,9 +15,10 @@ RUN apk upgrade --update && \
     procps
 
 RUN go get -u github.com/air-verse/air && \
-    go build -o /go/bin/air github.com/air-verse/air
+    go build -o /go/bin/air github.com/air-verse/air && \
+    go install github.com/go-delve/delve/cmd/dlv@latest
 
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
+ENV PATH="$PATH:/go/bin"
 
 # note WSL環境だからか？ディレクトリを信頼できてない見たい
 RUN git config --global --add safe.directory /go/src
