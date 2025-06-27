@@ -15,7 +15,6 @@ func main() {
 		fmt.Println("Error loading .env file")
 	}
 
-	//database.InitDB()
 	// リクエストログを含む各種ロガーの設定
 	log := logger.SetupLogger()
 	slog.SetDefault(log)
