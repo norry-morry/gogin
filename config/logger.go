@@ -1,17 +1,17 @@
-package logger
+package config
 
 import (
 	"gopkg.in/natefinch/lumberjack.v2"
-	"log"
 	"log/slog"
 	"os"
 	"resume/Utility"
 )
 
-func SetupLogger() *slog.Logger {
-	log.Println(os.Getenv("LOGGER_PATH"))
+func SetupLogger(p string) *slog.Logger {
+	//log.Println(p)
+	//log.Println(os.Getenv("LOGGER_PATH"))
 	logFile := &lumberjack.Logger{
-		Filename:   os.Getenv("LOGGER_PATH"),
+		Filename:   p,
 		MaxSize:    10,
 		MaxBackups: 3,
 		MaxAge:     28,
