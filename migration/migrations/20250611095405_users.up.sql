@@ -1,5 +1,6 @@
 CREATE TABLE if not exists users (
-    `id`           CHAR(36)  not null comment 'ユーザーID',
+--     `id`           CHAR(36)  not null comment 'ユーザーID',
+    `id`           INT8 not null auto_increment comment 'ユーザーID',
     `name`         varchar(255)   not null comment 'ユーザー名-実名',
     `display_name` varchar(255)   not null comment '画面表示名',
     `email` varchar(255) DEFAULT NULL COMMENT 'email',
