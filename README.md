@@ -4,40 +4,42 @@
 
 ```shell
 .
-├── main.go                    # ✅ エントリーポイントをここに
+├── main.go                        # ✅ アプリエントリポイント
 ├── config/
-│   ├── config.go              # 環境変数、設定 [x]
-│   ├── db.go                  # 環境変数、設定 [x]
-│   ├── legger.go              # 環境変数、設定 [x]
-│   └── provider.go            # 環境変数、設定 [x]
+│   ├── config.go                  # .env / yaml読み込み
+│   ├── db.go                      # NewDB, DSN生成
+│   ├── legger.go                  # slog + lumberjack ロガー設定
+│   └── provider.go                #
 ├── di/
-│   ├── wire.go                # Wireプロバイダ定義ファイル
-│   └── wire_gen.go            # 自動生成されるDIコード
-├── domain/                    # ドメイン（エンティティ・インタフェース）
+│   ├── wire.go                    # Wire定義（InitApp）
+│   └── wire_gen.go                # 自動生成された依存解決コード
+├── domain/
 │   ├── user/
-│   │   ├── entity.go          # [x]
-│   │   └── repository.go      # [x]
+│   │   ├── entity.go              # Userエンティティ定義
+│   │   └── repository.go          # UserRepositoryインターフェース定義
 │   └── valueobject/
 ├── infrastructure/
-│       └── db.go              # GORM接続 [x]
-├── interface/                 # ハンドラとリポジトリ実装
-│   ├── handler/
-│   │   └── user_handler.go    # [x]
-│   └── repository/
-│       └── user_repository.go # [x]
-├── middleware/
-│       └── db.go              # GORM接続 [x]
+│   ├── gorm/
+│   │   └── repository.go          # GORMによるUserRepository実装
+│   └── logger/
+│       └── sql_logger.go          # slog連携したGORMロガー
+├── interface/
+│   └── handler/
+│       └── user_handler.go        # GinのHandler（Controller）
+├── middleware/                    # ミドルウェア
+│       └── db.go
 ├── migration/
-│       ├── migrations/
-│       └── main.go            # GORM接続 [x]
+│       ├── migrations/            # マイグレーションファイル(up,down共に書く、autoマイグレーションは使わない)
+│       └── main.go                # マイグレーションの実行コマンド
 ├── router/
-│       └── router.go            # GORM接続 [x]
-├── storage/                    # ドメイン（エンティティ・インタフェース）
+│       └── router.go              # Ginエンジン・ルーティング
+├── storage/                       # ログなどアプリケーション本体から生成されるけど、dockerで管理したくないディレクトリ(docker-compose.ymlでマウント)
 │   └── logs/
-├── usecase/                   # ユースケース
+├── usecase/                       # ユースケース
 │   └── user/
-│       └── user_usecase.go        # [x]
-├── Utility/                   # ユースケース
+│       ├── user_usecase.go        # ユースケース実装
+│       └── user_usecase_test.go   # 手書きモックによるユニットテスト
+├── Utility/                       # ユーティリティ
 │   └── log.go
 ├── go.mod
 └── go.sum

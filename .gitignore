@@ -6,3 +6,6 @@ tmp
 .env
 /di/wire_gen.go
 **/wire_gen.go
+**/*_mock.go
+/di/test_wire_gen.go
+**/test_wire_gen.go
