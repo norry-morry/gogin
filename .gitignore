@@ -5,3 +5,4 @@ tmp
 /main
 .env
 /di/wire_gen.go
+**/wire_gen.go
