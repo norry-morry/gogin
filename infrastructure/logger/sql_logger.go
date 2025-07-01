@@ -59,11 +59,26 @@ func (l *SlogGormLogger) Trace(ctx context.Context, begin time.Time, fc func() (
 	switch {
 	case err != nil && l.LogLevel >= gormlogger.Error:
 		fields = append(fields, slog.Any("error", err))
-		l.logger.Error("gorm error", fields) // ← ここ
+		//l.logger.Error("gorm error", fields) // ← ここ
+		args := make([]any, len(fields))
+		for i, f := range fields {
+			args[i] = f
+		}
+		l.logger.Error("gorm error", slog.Group("fields", args...))
 	case elapsed > l.SlowThreshold && l.LogLevel >= gormlogger.Warn:
 		fields = append(fields, slog.String("warning", "slow query"))
-		l.logger.Warn("gorm slow query", fields) // ← ここ
+		//l.logger.Warn("gorm slow query", fields) // ← ここ
+		args := make([]any, len(fields))
+		for i, f := range fields {
+			args[i] = f
+		}
+		l.logger.Warn("gorm slow query", slog.Group("fields", args...))
 	case l.LogLevel >= gormlogger.Info:
-		l.logger.Info("gorm query", fields) // ← ここ
+		//l.logger.Info("gorm query", fields) // ← ここ
+		args := make([]any, len(fields))
+		for i, f := range fields {
+			args[i] = f
+		}
+		l.logger.Warn("gorm query", slog.Group("fields", args...))
 	}
 }
