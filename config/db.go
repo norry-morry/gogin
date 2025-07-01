@@ -1,29 +1,46 @@
 package config
 
 import (
+	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"log"
+	gormlogger "gorm.io/gorm/logger"
+	"log/slog"
+	"resume/infrastructure/logger"
 )
 
-func NewDB(cfg MySQLSettings) *gorm.DB {
+func NewDB(cfg MySQLSettings, sqlLogger *slog.Logger) *gorm.DB {
 	dsn := cfg.DSN()
 
+	slogLogger := logger.NewSlogGormLogger(
+		sqlLogger,
+		gormlogger.Info,
+	)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: slogLogger,
 	})
 	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
+		slog.Default().Error("DB connection failed", slog.Any("error", err))
+		panic(fmt.Sprintf("failed to connect to DB: %v", err))
+		//log.Fatalf("failed to connect database: %v", err)
 	}
 
 	// DB接続情報(ping)
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("failed to get generic DB object: %v", err)
+		slog.Default().Error("failed to get generic DB", slog.Any("error", err))
+		panic(err)
 	}
 	if err := sqlDB.Ping(); err != nil {
-		log.Fatalf("failed to ping DB: %v", err)
+		slog.Default().Error("failed to ping DB", slog.Any("error", err))
+		panic(err)
 	}
+
+	// 接続プール設定（任意）
+	//sqlDB.SetMaxOpenConns(25)
+	//sqlDB.SetMaxIdleConns(25)
+	//sqlDB.SetConnMaxLifetime(5 * time.Minute)
+
+	slog.Default().Info("successfully connected to DB")
 	return db
 }

@@ -4,3 +4,4 @@ tmp
 /.env
 /main
 .env
+/di/wire_gen.go
