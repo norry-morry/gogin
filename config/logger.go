@@ -2,30 +2,26 @@ package config
 
 import (
 	"gopkg.in/natefinch/lumberjack.v2"
+	"io"
 	"log/slog"
 	"os"
-	"resume/Utility"
 )
 
-func SetupLogger(p string) *slog.Logger {
-	//log.Println(p)
-	//log.Println(os.Getenv("LOGGER_PATH"))
+func SetupLogger(filePath string) *slog.Logger {
 	logFile := &lumberjack.Logger{
-		Filename:   p,
+		Filename:   filePath,
 		MaxSize:    10,
 		MaxBackups: 3,
 		MaxAge:     28,
 		Compress:   true,
 	}
 
-	stdoutHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	})
+	// 標準出力とファイル出力の両方
+	writer := io.MultiWriter(os.Stdout, logFile)
 
-	fileHandler := slog.NewJSONHandler(logFile, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+	handler := slog.NewJSONHandler(writer, &slog.HandlerOptions{
+		Level:     slog.LevelInfo, // or slog.LevelDebug
+		AddSource: true,
 	})
-
-	multiHandler := Utility.NewMultiHandler(stdoutHandler, fileHandler)
-	return slog.New(multiHandler)
+	return slog.New(handler)
 }

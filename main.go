@@ -12,20 +12,22 @@ func main() {
 	cfg := config.Load()
 
 	// リクエストログを含む各種ロガーの設定
-	logger := config.SetupLogger(cfg.LogPath)
-	slog.SetDefault(logger)
+	appLogger := config.SetupLogger(cfg.AppLogPath)
+	slog.SetDefault(appLogger)
+
+	sqlLogger := config.SetupLogger(cfg.SqlLogPath)
 
 	// DIコンテナでrouterを構成
-	r, err := di.InitApp(cfg)
+	r, err := di.InitApp(cfg, sqlLogger)
 	if err != nil {
 		//log.Fatalf("di.InitApp err: %v", err)
-		logger.Error("failed to initialize app", slog.Any("error", err))
+		appLogger.Error("failed to initialize app", slog.Any("error", err))
 		log.Fatal(err)
 	}
 
-	logger.Info("Hello golang from docker with air!")
+	appLogger.Info("Hello golang from docker with air!")
 	//r.Run(cfg.AppIP + ":" + cfg.AppPort) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	if err := r.Run(cfg.AppIP + ":" + cfg.AppPort); err != nil {
-		logger.Error("server error", slog.Any("error", err))
+		appLogger.Error("server error", slog.Any("error", err))
 	}
 }

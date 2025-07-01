@@ -18,10 +18,11 @@ func (c *MySQLSettings) DSN() string {
 }
 
 type Config struct {
-	MySQL   MySQLSettings
-	AppPort string
-	AppIP   string
-	LogPath string
+	MySQL      MySQLSettings
+	AppPort    string
+	AppIP      string
+	AppLogPath string
+	SqlLogPath string
 }
 
 func getEnv(key, fallback string) string {
@@ -41,8 +42,9 @@ func Load() Config {
 			Pass:   getEnv("DB_PASS", "root"),
 			DBName: getEnv("DB_NAME", "mydb"),
 		},
-		AppPort: getEnv("APP_PORT", "8080"),
-		AppIP:   getEnv("APP_IP", "127.0.0.1"),
-		LogPath: getEnv("LOGGER_PATH", "app.log"),
+		AppPort:    getEnv("APP_PORT", "8080"),
+		AppIP:      getEnv("APP_IP", "127.0.0.1"),
+		AppLogPath: getEnv("APP_LOG_PATH", "app.log"),
+		SqlLogPath: getEnv("SQL_LOG_PATH", "app.log"),
 	}
 }
