@@ -24,6 +24,8 @@ RUN go get -u github.com/air-verse/air && \
     go install github.com/go-delve/delve/cmd/dlv@latest && \
     go install github.com/google/wire/cmd/wire@latest && \
     go install golang.org/x/tools/cmd/goimports@latest && \
+    go install gotest.tools/gotestsum@latest && \
+    go install github.com/t-yuki/gocover-cobertura@latest && \
     go install go.uber.org/mock/mockgen@latest && \
     go get go.uber.org/mock
 

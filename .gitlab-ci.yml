@@ -69,19 +69,15 @@ unit-test-job:
       - coverage.out
       - coverage.html
 
-#test-job:
-#  variables:
-#    JOB_VAR: "A job variable"
-#  tags:
-#    - backend
-#  script:
-#    - echo "The job's stage is '$CI_JOB_STAGE'"
-#    - echo "Variables are '$GLOBAL_VAR' and '$JOB_VAR'"
+deploy-develop-job:
+  script:
+    - echo "test"
 
-#test-job2:
-#  stage: test
-#  tags:
-#    - backend
-#  script:
-#    - echo "Variables are '$GLOBAL_VAR' and '$JOB_VAR'"
+deploy-staging-job:
+  script:
+    - echo "test"
+
+deploy-prod-job:
+  script:
+    - echo "test"
 

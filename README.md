@@ -53,3 +53,14 @@ cd di && wire
 ```shell
 cd migration && go run main.go up
 ```
+
+## ユニットテスト・lintの実行
+```shell
+# lintの実行は
+golangci-lint run --config .golangci.yml --out-format junit-xml ./... > lint-report.xml
+## で行えます。テスト結果はバックエンドのルートディレクトリに lint-report.xml が生成されます
+
+# unittestの実行は
+gotestsum --junitfile unit-test-report.xml -- -coverprofile=coverage.out ./...
+## で行えます。テスト結果はバックエンドのルートディレクトリに unit-test-report.xml が生成されます
+```
