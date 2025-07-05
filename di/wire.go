@@ -4,14 +4,15 @@
 package di
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 	"log/slog"
 	"resume/config"
 	infra "resume/infrastructure/gorm"
 	"resume/interface/handler"
 	"resume/router"
 	"resume/usecase/user"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 )
 
 func InitApp(cfg config.Config, sqlLogger *slog.Logger) (*gin.Engine, error) {

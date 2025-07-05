@@ -1,13 +1,15 @@
+// Package main はデータベースのマイグレーション処理を行うエントリーポイントです。
 package main
 
 import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate"
@@ -19,13 +21,13 @@ import (
 var migrationFilePath = "file://./migrations/"
 
 func main() {
-	fmt.Println("start migration:", time.Now())
+	log.Println("start migration:", time.Now())
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 	Host := os.Getenv("DB_HOST")
-	fmt.Println("DB_HOST:", Host)
+	log.Println("DB_HOST:", Host)
 	flag.Parse()
 	command := flag.Arg(0)
 	migrationFileName := flag.Arg(1)
@@ -36,11 +38,18 @@ func main() {
 	}
 
 	m := newMigrate()
-	version, dirty, _ := m.Version()
+	//version, dirty, _ := m.Version()
+	version, dirty, versionErr := m.Version()
+	if versionErr != nil {
+		log.Fatalf("failed to get migration version: %v", versionErr)
+	}
 	force := flag.Bool("f", false, "force execute fixed sql")
 	if dirty && !*force {
-		fmt.Println("force=true: force execute current version sql")
-		m.Force(int(version))
+		log.Println("force=true: force execute current version sql")
+		//m.Force(int(version))
+		if err := m.Force(int(version)); err != nil {
+			log.Fatal(err) // 必要に応じて他のハンドリングでもOK
+		}
 	}
 
 	switch command {
@@ -55,7 +64,7 @@ func main() {
 	case "version":
 		showVersionInfo(m.Version())
 	default:
-		fmt.Println("\nerror: invalid command '", command, "'")
+		log.Println("\nerror: invalid command '", command, "'")
 		showUsage()
 		os.Exit(0)
 	}
@@ -79,13 +88,13 @@ func newMigrate() *migrate.Migrate {
 	dsn := generateDsn()
 	db, openErr := sql.Open("mysql", dsn)
 	if openErr != nil {
-		fmt.Println(errors.Wrap(openErr, "error occurred. sql.Open()"))
+		log.Println(errors.Wrap(openErr, "error occurred. sql.Open()"))
 		os.Exit(1)
 	}
 
 	driver, instanceErr := mysql.WithInstance(db, &mysql.Config{})
 	if instanceErr != nil {
-		fmt.Println(errors.Wrap(instanceErr, "error occurred. mysql.WithInstance()"))
+		log.Println(errors.Wrap(instanceErr, "error occurred. mysql.WithInstance()"))
 		os.Exit(1)
 	}
 
@@ -96,14 +105,14 @@ func newMigrate() *migrate.Migrate {
 	)
 
 	if err != nil {
-		fmt.Println(errors.Wrap(err, "error occurred. migrate.NewWithDatabaseInstance()"))
+		log.Println(errors.Wrap(err, "error occurred. migrate.NewWithDatabaseInstance()"))
 		os.Exit(1)
 	}
 	return m
 }
 
 func showUsage() {
-	fmt.Println(`
+	log.Println(`
 -------------------------------------
 Usage:
   go run migration/main.go <command>
@@ -118,7 +127,7 @@ Commands:
 
 func newMigration(name string) {
 	if name == "" {
-		fmt.Println("\nerror: migration file name must be supplied as an argument")
+		log.Println("\nerror: migration file name must be supplied as an argument")
 		os.Exit(1)
 	}
 	base := fmt.Sprintf("./migrations/%s_%s", time.Now().Format("20060102030405"), name)
@@ -134,29 +143,29 @@ func createFile(fname string) {
 }
 
 func up(m *migrate.Migrate) {
-	fmt.Println("Before:")
+	log.Println("Before:")
 	showVersionInfo(m.Version())
 	err := m.Up()
 	if err != nil {
 		if err.Error() != "no change" {
 			panic(err)
 		}
-		fmt.Println("\nno change")
+		log.Println("\nno change")
 	} else {
-		fmt.Println("\nUpdated:")
+		log.Println("\nUpdated:")
 		version, dirty, err := m.Version()
 		showVersionInfo(version, dirty, err)
 	}
 }
 
 func down(m *migrate.Migrate) {
-	fmt.Println("Before:")
+	log.Println("Before:")
 	showVersionInfo(m.Version())
 	err := m.Steps(-1)
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("\nUpdated:")
+		log.Println("\nUpdated:")
 		showVersionInfo(m.Version())
 	}
 }
@@ -166,15 +175,15 @@ func drop(m *migrate.Migrate) {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("Dropped all migrations")
+		log.Println("Dropped all migrations")
 		return
 	}
 }
 
 func showVersionInfo(version uint, dirty bool, err error) {
-	fmt.Println("-------------------")
-	fmt.Println("version : ", version)
-	fmt.Println("dirty   : ", dirty)
-	fmt.Println("error   : ", err)
-	fmt.Println("-------------------")
+	log.Println("-------------------")
+	log.Println("version : ", version)
+	log.Println("dirty   : ", dirty)
+	log.Println("error   : ", err)
+	log.Println("-------------------")
 }

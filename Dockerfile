@@ -23,6 +23,7 @@ RUN go get -u github.com/air-verse/air && \
     go build -o /go/bin/air github.com/air-verse/air && \
     go install github.com/go-delve/delve/cmd/dlv@latest && \
     go install github.com/google/wire/cmd/wire@latest && \
+    go install golang.org/x/tools/cmd/goimports@latest && \
     go install go.uber.org/mock/mockgen@latest && \
     go get go.uber.org/mock
 

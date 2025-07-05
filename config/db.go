@@ -1,14 +1,17 @@
+// Package config provides database connection configuration settings.
 package config
 
 import (
 	"fmt"
+	"log/slog"
+	"resume/infrastructure/logger"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
-	"log/slog"
-	"resume/infrastructure/logger"
 )
 
+// NewDB は指定されたMySQL設定とロガーを使用して新しいGormのDBインスタンスを返します。
 func NewDB(cfg MySQLSettings, sqlLogger *slog.Logger) *gorm.DB {
 	dsn := cfg.DSN()
 

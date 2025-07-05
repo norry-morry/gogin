@@ -1,18 +1,20 @@
+// Package handler はエンドポイント処理を担当します。
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"resume/usecase/user"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	uc user.UserUsecase
+	uc user.Usecase
 }
 
-// NewUserHandler は UserUsecase を注入して handler を生成
-func NewUserHandler(uc user.UserUsecase) *UserHandler {
+// NewUserHandler は Usecase を注入して handler を生成
+func NewUserHandler(uc user.Usecase) *UserHandler {
 	return &UserHandler{uc: uc}
 }
 
@@ -26,15 +28,15 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// GetUserByID は GET /api/users/:id を処理
-func (h *UserHandler) GetUserById(c *gin.Context) {
+// GetUserByID は GET /api/users/:id を処理します。
+func (h *UserHandler) GetUserByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	usr, err := h.uc.GetUserById(uint(id))
+	usr, err := h.uc.GetUserByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

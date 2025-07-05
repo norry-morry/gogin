@@ -40,6 +40,8 @@ tmp_dir = "tmp"
   main_only = false
   silent = false
   time = true
+  color = "true"
+  timestamp = "true"
 
 [misc]
   clean_on_exit = false

@@ -1,13 +1,17 @@
+// Package config provides logger configuration settings.
 package config
 
 import (
-	"gopkg.in/natefinch/lumberjack.v2"
-	"io"
 	"log/slog"
 	"os"
+	"resume/utility"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+// SetupLogger は指定されたファイルパスにログを出力する slog.Logger を初期化して返します。
 func SetupLogger(filePath string) *slog.Logger {
+
 	logFile := &lumberjack.Logger{
 		Filename:   filePath,
 		MaxSize:    10,
@@ -16,12 +20,22 @@ func SetupLogger(filePath string) *slog.Logger {
 		Compress:   true,
 	}
 
-	// 標準出力とファイル出力の両方
-	writer := io.MultiWriter(os.Stdout, logFile)
-
-	handler := slog.NewJSONHandler(writer, &slog.HandlerOptions{
-		Level:     slog.LevelInfo, // or slog.LevelDebug
+	// 標準出力
+	stdoutHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
 		AddSource: true,
 	})
-	return slog.New(handler)
+
+	// ファイル出力
+	fileHandler := slog.NewJSONHandler(logFile, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	})
+
+	multiHandler := utility.NewMultiHandler(stdoutHandler, fileHandler)
+
+	logger := slog.New(multiHandler)
+	slog.SetDefault(logger)
+
+	return logger
 }

@@ -1,10 +1,12 @@
+// Package middleware はリクエストのロギングなどのミドルウェアを提供します。
 package middleware
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"log/slog"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ctxKeyLogger struct{}

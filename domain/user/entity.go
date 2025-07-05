@@ -1,7 +1,9 @@
+// Package user はユーザー関連のドメインエンティティを定義します。
 package user
 
 import "time"
 
+// User はユーザーを表すドメインエンティティです。
 type User struct {
 	ID          uint64    `json:"id" gorm:"primary_key"`
 	Name        string    `json:"name"`

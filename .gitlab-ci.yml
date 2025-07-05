@@ -30,6 +30,25 @@ pre-build-job:
     paths:
       - di/wire_gen.go
 
+lint-job:
+  stage: test
+#  image: golang:1.24.2
+  image: golangci/golangci-lint:v1.64.8
+  script:
+    - echo "Running revive lint check..."
+    - echo "Current dir $(pwd)"
+    - ls -la .golangci.yml
+    - golangci-lint --version
+    - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    - export PATH=$PATH:/go/bin
+    - golangci-lint run --config .golangci.yml --out-format junit-xml ./... > lint-report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: lint-report.xml
+    paths:
+      - lint-report.xml
+
 unit-test-job:
   stage: test
   image: golang:1.24.4-alpine

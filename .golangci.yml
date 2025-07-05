@@ -1,0 +1,62 @@
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    - revive
+    - errcheck
+    - gofmt
+    - goimports
+    - govet
+    - staticcheck
+    - unused
+#  disable:
+#    - bodyclose         # 必要なら
+#    - depguard          # 必要なら
+
+linters-settings:
+  revive:
+    confidence: 0.8
+    severity: warning
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: exported
+      - name: indent-error-flow
+      - name: var-naming
+      - name: package-comments
+      - name: unhandled-error
+
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+  gofmt:
+    simplify: true
+
+  staticcheck:
+    checks: ["all"]  # 必要なら ["SA*", "ST*"] に絞る
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  # 特定のメッセージやファイルパスで除外する場合
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - revive
+    - text: "cyclomatic complexity"
+      linters:
+        - revive
+        - gocyclo
+    - text: "should have comment or be unexported"
+      linters:
+        - revive
+
+output:
+  formats:
+    - junit-xml
+    - colored-line-number
