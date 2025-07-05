@@ -1,10 +1,11 @@
+// Package router はアプリケーションのHTTPルーティングを定義します。
 package router
 
 import (
-	"github.com/gin-gonic/gin"
-	"log/slog"
 	"resume/interface/handler"
 	"resume/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter(
@@ -16,7 +17,6 @@ func SetupRouter(
 	r.Use(gin.Recovery())
 
 	r.GET("/ping", func(c *gin.Context) {
-		slog.Debug("PingHandler called") // default logger 使用
 		c.JSON(200, gin.H{
 			"message": "Hello air! pong2",
 		})
@@ -34,7 +34,7 @@ func SetupRouter(
 		user := api.Group("/users")
 		{
 			user.GET("/", userHandler.GetAllUsers)
-			user.GET("/:id", userHandler.GetUserById)
+			user.GET("/:id", userHandler.GetUserByID)
 			user.POST("/", userHandler.CreateUser)
 			user.PUT("/:id", userHandler.UpdateUser)
 			user.DELETE("/:id", userHandler.DeleteUser)

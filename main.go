@@ -1,3 +1,4 @@
+// Package main は resume アプリケーションのエントリーポイントです。
 package main
 
 import (
@@ -8,6 +9,7 @@ import (
 )
 
 func main() {
+	slog.Debug("Hello")
 	// 環境変数の読込
 	cfg := config.Load()
 
@@ -15,7 +17,7 @@ func main() {
 	appLogger := config.SetupLogger(cfg.AppLogPath)
 	slog.SetDefault(appLogger)
 
-	sqlLogger := config.SetupLogger(cfg.SqlLogPath)
+	sqlLogger := config.SetupLogger(cfg.SQLLogPath)
 
 	// DIコンテナでrouterを構成
 	r, err := di.InitApp(cfg, sqlLogger)

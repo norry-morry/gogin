@@ -1,10 +1,11 @@
+// Package user はユーザー操作のユースケース層（ビジネスロジック）を定義します。
 package user
 
 import "resume/domain/user"
 
-type UserUsecase interface {
+type Usecase interface {
 	GetAllUsers() ([]user.User, error)
-	GetUserById(id uint) (*user.User, error)
+	GetUserByID(id uint) (*user.User, error)
 	CreateUser(name, displayName string, email string) error
 	UpdateUser(id uint, name, displayName string, email string) error
 	DeleteUser(id uint) error
@@ -18,8 +19,8 @@ func (uc *userUsecase) GetAllUsers() ([]user.User, error) {
 	return uc.repo.FindAll()
 }
 
-func (uc userUsecase) GetUserById(id uint) (*user.User, error) {
-	return uc.repo.FindById(id)
+func (uc userUsecase) GetUserByID(id uint) (*user.User, error) {
+	return uc.repo.FindByID(id)
 }
 
 func (uc userUsecase) CreateUser(name, displayName string, email string) error {
@@ -32,7 +33,7 @@ func (uc userUsecase) CreateUser(name, displayName string, email string) error {
 }
 
 func (uc userUsecase) UpdateUser(id uint, name, displayName string, email string) error {
-	u, err := uc.repo.FindById(id)
+	u, err := uc.repo.FindByID(id)
 	if err != nil {
 		return err
 	}
@@ -43,13 +44,13 @@ func (uc userUsecase) UpdateUser(id uint, name, displayName string, email string
 }
 
 func (uc userUsecase) DeleteUser(id uint) error {
-	_, err := uc.repo.FindById(id)
+	_, err := uc.repo.FindByID(id)
 	if err != nil {
 		return err
 	}
 	return uc.repo.Delete(id)
 }
 
-func NewUserUsecase(repo user.Repository) UserUsecase {
+func NewUserUsecase(repo user.Repository) Usecase {
 	return &userUsecase{repo: repo}
 }

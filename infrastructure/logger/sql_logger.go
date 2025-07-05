@@ -1,84 +1,58 @@
+// Package logger は GORM 用の SQL ログ出力を含むロギングユーティリティを提供します。
 package logger
 
 import (
 	"context"
-	"fmt"
-	gormlogger "gorm.io/gorm/logger"
-	"log/slog"
 	"time"
+
+	"log/slog"
+
+	"gorm.io/gorm/logger"
 )
 
+// SlogGormLogger は slog を使用した GORM のロガー実装です。
 type SlogGormLogger struct {
-	logger        *slog.Logger
-	LogLevel      gormlogger.LogLevel
-	SlowThreshold time.Duration
+	logger *slog.Logger
+	level  logger.LogLevel
 }
 
-func NewSlogGormLogger(logger *slog.Logger, level gormlogger.LogLevel) gormlogger.Interface {
+// NewSlogGormLogger は GORM のロガーインターフェースを実装する新しい SlogGormLogger を作成して返します。
+func NewSlogGormLogger(logger *slog.Logger, level logger.LogLevel) logger.Interface {
 	return &SlogGormLogger{
-		logger:        logger,
-		LogLevel:      level,
-		SlowThreshold: 200 * time.Millisecond, // 遅いクエリの閾値
+		logger: logger,
+		level:  level,
 	}
 }
 
-func (l *SlogGormLogger) LogMode(level gormlogger.LogLevel) gormlogger.Interface {
-	newLogger := *l
-	newLogger.LogLevel = level
-	return &newLogger
+// LogMode は SlogGormLogger のログレベルを設定し、更新されたロガーを返します。
+func (l *SlogGormLogger) LogMode(level logger.LogLevel) logger.Interface {
+	l.level = level
+	return l
 }
 
+// Info は指定されたコンテキスト、メッセージ、追加データを使用して情報ログを出力します。
 func (l *SlogGormLogger) Info(ctx context.Context, msg string, data ...interface{}) {
-	if l.LogLevel >= gormlogger.Info {
-		l.logger.Info(fmt.Sprintf(msg, data...))
-	}
+	l.logger.InfoContext(ctx, msg, data...)
 }
 
+// Warn は指定されたコンテキスト、メッセージ、追加データを使用して警告ログを出力します。
 func (l *SlogGormLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
-	if l.LogLevel >= gormlogger.Warn {
-		l.logger.Warn(fmt.Sprintf(msg, data...))
-	}
+	l.logger.WarnContext(ctx, msg, data...)
 }
 
+// Error は指定されたコンテキスト、メッセージ、追加データを使用してエラーログを出力します。
 func (l *SlogGormLogger) Error(ctx context.Context, msg string, data ...interface{}) {
-	if l.LogLevel >= gormlogger.Error {
-		l.logger.Error(fmt.Sprintf(msg, data...))
-	}
+	l.logger.ErrorContext(ctx, msg, data...)
 }
 
+// Trace はデータベース操作の詳細（実行時間、実行SQL、影響行数、エラー）をログ出力します。
 func (l *SlogGormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	elapsed := time.Since(begin)
 	sql, rows := fc()
 
-	fields := []slog.Attr{
-		slog.String("sql", sql),
-		slog.Int64("rows", rows),
-		slog.Duration("elapsed", elapsed),
-	}
-
-	switch {
-	case err != nil && l.LogLevel >= gormlogger.Error:
-		fields = append(fields, slog.Any("error", err))
-		//l.logger.Error("gorm error", fields) // ← ここ
-		args := make([]any, len(fields))
-		for i, f := range fields {
-			args[i] = f
-		}
-		l.logger.Error("gorm error", slog.Group("fields", args...))
-	case elapsed > l.SlowThreshold && l.LogLevel >= gormlogger.Warn:
-		fields = append(fields, slog.String("warning", "slow query"))
-		//l.logger.Warn("gorm slow query", fields) // ← ここ
-		args := make([]any, len(fields))
-		for i, f := range fields {
-			args[i] = f
-		}
-		l.logger.Warn("gorm slow query", slog.Group("fields", args...))
-	case l.LogLevel >= gormlogger.Info:
-		//l.logger.Info("gorm query", fields) // ← ここ
-		args := make([]any, len(fields))
-		for i, f := range fields {
-			args[i] = f
-		}
-		l.logger.Warn("gorm query", slog.Group("fields", args...))
+	if err != nil {
+		l.logger.ErrorContext(ctx, "SQL エラー", "error", err, "duration", elapsed, "rows", rows, "sql", sql)
+	} else {
+		l.logger.InfoContext(ctx, "SQL トレース", "duration", elapsed, "rows", rows, "sql", sql)
 	}
 }

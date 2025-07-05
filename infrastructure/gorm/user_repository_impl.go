@@ -1,8 +1,10 @@
+// Package gorm は GORM を使用したリポジトリ実装を提供します。
 package gorm
 
 import (
-	"gorm.io/gorm"
 	"resume/domain/user"
+
+	"gorm.io/gorm"
 )
 
 type userRepository struct {
@@ -20,7 +22,7 @@ func (r *userRepository) FindAll() ([]user.User, error) {
 	return users, err
 }
 
-func (r *userRepository) FindById(id uint) (*user.User, error) {
+func (r *userRepository) FindByID(id uint) (*user.User, error) {
 	var u user.User
 	err := r.db.First(&u, id).Error
 	if err != nil {

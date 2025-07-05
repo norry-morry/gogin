@@ -2,14 +2,15 @@ package user
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"resume/domain/user"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type mockUserRepository struct {
 	FindAllFn  func() ([]user.User, error)
-	FindByIdFn func(uint) (*user.User, error)
+	FindByIDFn func(uint) (*user.User, error)
 	CreateFn   func(*user.User) error
 	UpdateFn   func(*user.User) error
 	DeleteFn   func(uint) error
@@ -18,8 +19,8 @@ type mockUserRepository struct {
 func (m *mockUserRepository) FindAll() ([]user.User, error) {
 	return m.FindAllFn()
 }
-func (m *mockUserRepository) FindById(id uint) (*user.User, error) {
-	return m.FindByIdFn(id)
+func (m *mockUserRepository) FindByID(id uint) (*user.User, error) {
+	return m.FindByIDFn(id)
 }
 func (m *mockUserRepository) Create(user *user.User) error {
 	return m.CreateFn(user)
