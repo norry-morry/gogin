@@ -2,7 +2,7 @@ stages:
   - pre-build
 #- build
   - test
-#- deploy
+  - deploy
 #- review
 #- dast
 #- staging
@@ -15,31 +15,30 @@ stages:
 #- performance
 #- cleanup
 
-#variables:
-#  GLOBAL_VAR: "A global variable"
+variables:
+  GOLANGCI_LINT_VERSION: "v1.64.8"
 
+# プレビルド：常に実行
 pre-build-job:
   stage: pre-build
   image: golang:1.24.4-alpine
   before_script:
     - go install github.com/google/wire/cmd/wire@latest
-    - wire ./di || true
   script:
-    - wire
+    - wire ./di || true
   artifacts:
     paths:
       - di/wire_gen.go
+  rules:
+    - when: always  # 常に実行
 
+# Lint：develop, staging, main 以外
 lint-job:
   stage: test
-#  image: golang:1.24.2
-  image: golangci/golangci-lint:v1.64.8
+  image: golangci/golangci-lint:${GOLANGCI_LINT_VERSION}
   script:
     - echo "Running revive lint check..."
-    - echo "Current dir $(pwd)"
-    - ls -la .golangci.yml
     - golangci-lint --version
-    - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     - export PATH=$PATH:/go/bin
     - golangci-lint run --config .golangci.yml --out-format junit-xml ./... > lint-report.xml
   artifacts:
@@ -48,7 +47,13 @@ lint-job:
       junit: lint-report.xml
     paths:
       - lint-report.xml
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+      when: always
 
+# Unit Test：develop, staging, main 以外
 unit-test-job:
   stage: test
   image: golang:1.24.4-alpine
@@ -68,16 +73,37 @@ unit-test-job:
     paths:
       - coverage.out
       - coverage.html
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+      when: always
 
-deploy-develop-job:
+# 共通デプロイジョブ：develop/staging/main用
+deploy-job:
+  stage: deploy
   script:
-    - echo "test"
-
-deploy-staging-job:
-  script:
-    - echo "test"
-
-deploy-prod-job:
-  script:
-    - echo "test"
-
+    - echo "Deploying branch - $CI_COMMIT_BRANCH"
+#    - echo "Target Host - $DEPLOY_TARGET"
+#    - echo "Using ENV - $APP_ENV"
+#    - ssh user@$DEPLOY_TARGET "deploy-command --env=$APP_ENV"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+#      variables:
+#        DEPLOY_TARGET: $DEV_DEPLOY_TARGET
+#        APP_ENV: $DEV_APP_ENV
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+#      variables:
+#        DEPLOY_TARGET: $STG_DEPLOY_TARGET
+#        APP_ENV: $STG_APP_ENV
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "main"'
+#      variables:
+#        DEPLOY_TARGET: $PRD_DEPLOY_TARGET
+#        APP_ENV: $PRD_APP_ENV
+      when: always
+  dependencies:
+    - pre-build-job

@@ -9,5 +9,9 @@ tmp
 **/*_mock.go
 /di/test_wire_gen.go
 **/test_wire_gen.go
-/lint-report.xml
-/lint-report-ci.xml
+lint-report.xml
+lint-report-ci.xml
+*-report.xml
+coverage.out
+coverage.html
+coverage.xml
