@@ -1,0 +1,41 @@
+# top-most EditorConfig file
+root = true
+
+# 共通設定（すべてのファイル）
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+ij_editor_show_whitespaces = true
+ij_editor_show_leading_whitespace = true
+ij_editor_show_inner_whitespace = true
+ij_editor_show_trailing_whitespace = true
+ij_editor_show_tabs = true
+ij_editor_show_line_breaks = true
+
+# スペース2つ：Vue, HTML, YAML, JSON, Markdown, YAML, Dockerfile
+[*.{js,ts,vue,json,yml,yaml,html,css,scss,md,xml,Dockerfile}]
+indent_size = 2
+
+# スペース4つ：Go, SQL
+[*.sql]
+indent_size = 4
+
+# スペース4つ：Go, SQL
+[*.go]
+indent_style = tab
+indent_size = 4
+
+[*toml]
+indent_size = 2
+
+# Makefileはタブ必須
+[Makefile]
+indent_style = tab
+
+# .env 系はそのまま維持（不要な改行などを避ける）
+[*.env]
+insert_final_newline = false
+trim_trailing_whitespace = false

@@ -15,3 +15,6 @@ lint-report-ci.xml
 coverage.out
 coverage.html
 coverage.xml
+coverage.txt
+public/
+/artifacts/

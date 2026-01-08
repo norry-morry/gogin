@@ -1,0 +1,9 @@
+explanation: 氏名・表示名・生年月日など/profileで使う多言語化ファイル
+root:
+  title: 基本情報
+  description: 氏名・表示名・生年月日など
+age_group:
+  label: "{ageGroup}代"
+  under10: "10才未満"
+  unknown: "年齢不明"
+  age: "{age}才"

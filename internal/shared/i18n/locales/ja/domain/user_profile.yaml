@@ -1,0 +1,45 @@
+explanation: "user_profileのエンティティに関係する辞書"
+
+entity:
+  label: "ユーザー情報"
+  placeholder: "ユーザー情報"
+
+user_id:
+  label: ユーザーID
+  placeholder: "紐付くusersテーブルのPK"
+family_name:
+  label: "姓"
+  placeholder: "例: 山田"
+given_name:
+  label: "名"
+  placeholder: "例: 太郎"
+family_name_kana:
+  label: セイ
+  placeholder: "例: ヤマダ"
+given_name_kana:
+  label: メイ
+  placeholder: "例: タロウ"
+legal_name:
+  label: 氏名
+  placeholder: "例：山田 太郎"
+legal_name_kana:
+  label: フリガナ
+  placeholder: "例：ヤマダ タロウ"
+birth_date:
+  label: 生年月日
+  placeholder: "例：2025-01-01"
+gender_id:
+  label: 性別ID
+  placeholder: "例: 男性"
+gender:
+  label: 性別
+  placeholder: "例: 男性"
+initial:
+  label: イニシャル
+  placeholder: "例: A.B. AB"
+created_at:
+  label: 作成日時
+  placeholder: "自動設定されます"
+updated_at:
+  label: 更新日時
+  placeholder: "自動設定されます"

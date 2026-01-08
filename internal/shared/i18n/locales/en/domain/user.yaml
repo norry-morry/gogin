@@ -1,0 +1,53 @@
+explanation: "userのエンティティに関係する辞書"
+
+entity:
+  label: "User"
+  placeholder: "User"
+
+id:
+  label: User ID
+  placeholder: "Primary key of the users table"
+
+uid:
+  label: Firebase UID
+  placeholder: "Firebase UID (unique within project)"
+
+email:
+  label: Email address
+  placeholder: "your.name@example.com"
+
+email_verified:
+  label: Email verified
+  placeholder: "true if verified"
+
+display_name:
+  label: Display name
+  placeholder: "The name displayed on the site"
+
+photo_url:
+  label: Avatar icon
+  placeholder: "https://example.com/avatar.png"
+
+disabled:
+  label: Disabled flag
+  placeholder: "true = login disabled"
+
+deleted_at:
+  label: Logical deletion (deactivation)
+  placeholder: "Automatically recorded when account is deleted"
+
+last_login_at:
+  label: Last login
+  placeholder: "Automatically recorded"
+
+created_at:
+  label: Created at
+  placeholder: "Automatically set"
+
+updated_at:
+  label: Updated at
+  placeholder: "Automatically set"
+
+password:
+  label: Password
+  placeholder: "At least 8 characters (letters, numbers, symbols)"

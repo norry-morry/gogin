@@ -1,0 +1,27 @@
+explanation: "user_identityのエンティティに関係する辞書"
+
+entity:
+  label: "ログインプロバイダ"
+  placeholder: "ログインプロバイダ"
+
+id:
+  label: id
+  placeholder: "user_identitiesテーブルのPK"
+user_id:
+  label: ユーザーID
+  placeholder: "紐付くusersテーブルのPK"
+provider:
+  label: プロバイダ
+  placeholder: "例：google"
+provider_user_id:
+  label: プロバイダユーザーID
+  placeholder: "例：firebase-auth-uid"
+provider_display_name:
+  label: 登録時氏名
+  placeholder: "連携時氏名のスナップショット（監査用）"
+email_at_signup:
+  label: 登録時メールアドレス
+  placeholder: "例：user@example.com"
+created_at:
+  label: 作成日時
+  placeholder: 自動設定されます

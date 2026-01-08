@@ -1,0 +1,58 @@
+explanation: "user_educationのエンティティに関係する辞書"
+
+entity:
+  label: "学歴"
+  placeholder: "学歴"
+
+id:
+  label: "学歴ID"
+  placeholder: "テーブルのPK"
+user_id:
+  label: "ユーザーID"
+  placeholder: "紐付くusersテーブルのPK"
+institution_name:
+  label: "学校名"
+  placeholder: "学校名"
+faculty_name:
+  label: "学部"
+  placeholder: "学部"
+department_name:
+  label: "学科・専攻"
+  placeholder: "学科・専攻"
+degree_type_id:
+  label: "学位種別ID"
+  placeholder: "学位種別ID"
+degree_type:
+  label: "学位種別"
+  placeholder: "学位種別"
+education_status_id:
+  label: "学歴状態ID"
+  placeholder: "学歴状態ID"
+education_status:
+  label: "学歴状態"
+  placeholder: "学歴状態"
+event_date:
+  label: "年月"
+  placeholder: "yyyy-mmの形式で入力して下さい"
+enrollment_date:
+  label: "入学年月"
+  placeholder: "入学年月"
+graduation_date:
+  label: "卒業（予定）年月"
+  placeholder: "卒業（予定）年月"
+description:
+  label: "補足"
+  placeholder: "補足"
+sort_order:
+  label: "表示順"
+  placeholder: "表示順"
+is_public:
+  label: "公開可否"
+  placeholder: "公開可否"
+created_at:
+  label: "作成日時"
+  placeholder: "自動設定されます"
+updated_at:
+  label: "更新日時"
+  placeholder: "自動設定されます"
+

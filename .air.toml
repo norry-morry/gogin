@@ -3,31 +3,51 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  args_bin = []
-  bin = "./tmp/main"
-#  cmd = "go build -o ./tmp/main ."
-  cmd = "go build -gcflags='all=-N -l' -o tmp/main ."
-  delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
-  exclude_file = []
+  # 変更検知からビルドまでのデバウンス
+  delay = 300
+
+  # 監視対象の拡張子
+  include_ext = ["go", "tpl", "tmpl", "html", "yaml", "yml", "toml", "env"]
+
+  # 除外
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "docs"]
+#  exclude_file = []
+  exclude_file = ["internal/di/wire_gen.go"]
   exclude_regex = ["_test.go"]
-  exclude_unchanged = false
-  follow_symlink = false
+
+  # ビルドコマンド（APIだけビルド）
+  #  cmd = "go build -o ./tmp/main ."
+  cmd = "go build -gcflags='all=-N -l' -o tmp/main ./cmd/api"
+
+  # 生成物の実行ファイルパス
+  bin = "./tmp/main"
   full_bin = "./tmp/main"
-#  full_bin = "dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./tmp/main"
-  include_dir = []
-  include_ext = ["go", "tpl", "tmpl", "html"]
-  include_file = []
-  kill_delay = "0s"
+  #  full_bin = "dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./tmp/main"
+
+  # 事前・事後フック
+  # Wire 生成を自動化（失敗しても再起動を止めないなら `|| true`）
+  pre_cmd = ["sh -c 'cd internal/di && wire || true'"]
+  post_cmd = ["sh -c 'chmod +x ./tmp/main || true'"]
+
+  # 優雅な再起動（SIGINT → 1秒待ってKILL）
+  send_interrupt = true
+  kill_delay = "1s"
+
+  # エラー時は古いバイナリを実行しない
+  stop_on_error = true
+
+  # ログ
   log = "build-errors.log"
-  poll = false
-  poll_interval = 0
-  post_cmd = []
-  pre_cmd = []
-  rerun = false
-  rerun_delay = 500
-  send_interrupt = false
-  stop_on_error = false
+
+#  args_bin = []
+#  exclude_unchanged = false
+#  follow_symlink = false
+#  include_dir = []
+#  include_file = []
+#  poll = false
+#  poll_interval = 0
+#  rerun = false
+#  rerun_delay = 500
 
 [color]
   app = ""
@@ -46,11 +66,11 @@ tmp_dir = "tmp"
 [misc]
   clean_on_exit = false
 
+[screen]
+  clear_on_rebuild = false
+  keep_scroll = true
+
 [proxy]
   app_port = 0
   enabled = false
   proxy_port = 0
-
-[screen]
-  clear_on_rebuild = false
-  keep_scroll = true

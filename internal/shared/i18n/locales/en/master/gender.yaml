@@ -1,0 +1,5 @@
+explanation: "性別マスタのレコード辞書"
+unspecified: Prefer not to say
+male: male
+female: female
+other: other

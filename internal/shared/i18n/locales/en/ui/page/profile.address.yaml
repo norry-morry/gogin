@@ -1,0 +1,5 @@
+explanation: profile/addressで使う多言語化ファイル
+root:
+  title: "Address"
+  description: Address to be listed on your resume or CV
+

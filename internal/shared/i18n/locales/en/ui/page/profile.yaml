@@ -1,0 +1,9 @@
+explanation: 氏名・表示名・生年月日など/profileで使う多言語化ファイル
+root:
+  title: Basic Profile
+  description: Basic profile information such as your full name, display name, and date of birth
+age_group:
+  label: "{ageGroup}s"
+  under10: "Under 10"
+  unknown: "Unknown"
+  age: "Age {age}"

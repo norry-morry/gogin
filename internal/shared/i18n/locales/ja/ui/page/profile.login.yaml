@@ -1,0 +1,9 @@
+explanation: "/profile/loginで使う多言語化ファイル"
+root:
+  title: ログイン情報
+  description: ログイン情報の概要
+section:
+  login:
+    title: ログイン情報
+  identity:
+    title: プロバイダ情報情報
