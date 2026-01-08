@@ -1,0 +1,66 @@
+explanation: "User address information dictionary (international format)"
+
+entity:
+  label: "User Address"
+  placeholder: "User Address"
+
+user_id:
+  label: "User ID"
+  placeholder: "Linked to users.id"
+purpose_id:
+  label: "Address Purpose"
+  placeholder: "Select usage type"
+is_primary:
+  label: "Primary Address"
+  placeholder: "Check if this is the main address"
+country_code:
+  label: "Country Code"
+  placeholder: "e.g., JP or US"
+administrative_area:
+  label: "State / Prefecture"
+  placeholder: "e.g., Tokyo"
+locality:
+  label: "City / Municipality"
+  placeholder: "e.g., Shibuya-ku"
+dependent_locality:
+  label: "District / Town / Area"
+  placeholder: "Optional"
+postal_code:
+  label: "Postal Code"
+  placeholder: "e.g., 150-0001"
+sorting_code:
+  label: "Sorting Code"
+  placeholder: "Used in some countries"
+address_line1:
+  label: "Address Line 1"
+  placeholder: "e.g., 1-2-3 Jingumae"
+address_line2:
+  label: "Address Line 2"
+  placeholder: "e.g., Bldg. Name, Room No."
+address_line3:
+  label: "Address Line 3"
+  placeholder: "Optional"
+organization:
+  label: "Organization / Company"
+  placeholder: "e.g., Resume Inc."
+given_name:
+  label: "Recipient First Name"
+  placeholder: "e.g., Taro"
+family_name:
+  label: "Recipient Last Name"
+  placeholder: "e.g., Yamada"
+language_code:
+  label: "Language Code"
+  placeholder: "e.g., ja-JP or en-US"
+latitude:
+  label: "Latitude"
+  placeholder: "e.g., 35.6895"
+longitude:
+  label: "Longitude"
+  placeholder: "e.g., 139.6917"
+created_at:
+  label: "Created At"
+  placeholder: "Automatically set"
+updated_at:
+  label: "Updated At"
+  placeholder: "Automatically updated"

@@ -1,0 +1,4 @@
+explanation: "profile/contact で使う多言語化ファイル #identity の中に入れても良いかもしれない"
+root:
+  title: 連絡先
+  description: '連絡先'

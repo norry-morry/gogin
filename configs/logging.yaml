@@ -1,0 +1,20 @@
+sensitive:
+  full:
+    - password
+    - "*token*"
+    - "authorization"
+    - "cookie"
+    - "secret*"
+  part:
+    - "email"
+    - "phone"
+    - "tel"
+    - "card"
+    - "account"
+    - "name"
+    - "address"
+
+partial:
+  keep_head: 1       # 先頭何文字を残すか
+  keep_tail: 4       # 末尾何文字を残すか
+  mask_char: "*"     # マスク文字

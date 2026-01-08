@@ -1,0 +1,42 @@
+explanation: "user_profileのエンティティに関係する辞書"
+
+entity:
+  label: "Basic Info"
+  placeholder: "Basic Info"
+
+family_name:
+  label: "Last Name"
+  placeholder: "e.g., Yamada"
+given_name:
+  label: "First Name"
+  placeholder: "e.g., Taro"
+family_name_kana:
+  label: "Last Name (Katakana)"
+  placeholder: "e.g., ヤマダ"
+given_name_kana:
+  label: "First Name (Katakana)"
+  placeholder: "e.g., タロウ"
+legal_name:
+  label: "Full Name"
+  placeholder: "Automatically generated (Last + First)"
+legal_name_kana:
+  label: "Full Name (Kana)"
+  placeholder: "Automatically generated (Last + First)"
+birth_date:
+  label: "Date of Birth"
+  placeholder: "e.g., YYYY-MM-DD"
+gender_id:
+  label: "Gender ID"
+  placeholder: "Reference to genders.id"
+gender:
+  label: "Gender"
+  placeholder: "Select your gender"
+initial:
+  label: "Initial"
+  placeholder: "e.g., T.Y."
+created_at:
+  label: "Created At"
+  placeholder: "Automatically set"
+updated_at:
+  label: "Updated At"
+  placeholder: "Automatically updated"

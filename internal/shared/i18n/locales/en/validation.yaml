@@ -1,0 +1,117 @@
+explanation: "バリデーションの辞書"
+rules:
+  # 1️⃣ Required / Nonempty
+  required: "{field} is required."
+  nonempty:
+    string: "Please enter {field}."
+    array: "Please select at least one {field}."
+
+  # 2️⃣ Type & Basic structure
+  type:
+    string: "{field} must be a string."
+    number: "{field} must be a number."
+    boolean: "{field} must be a boolean."
+    date: "{field} must be a valid date."
+    array: "{field} must be an array."
+    object: "{field} must be an object."
+
+  # 3️⃣ Length / Count / Range (merged section)
+  len:
+    string: "{field} must be exactly {len} characters."
+    array: "{field} must contain exactly {len} item(s)."
+  min:
+    string: "{field} must be at least {min} characters."
+    number: "{field} must be at least {min}."
+    array: "{field} must contain at least {min} item(s)."
+  max:
+    string: "{field} must be at most {max} characters."
+    number: "{field} must be at most {max}."
+    array: "{field} must contain at most {max} item(s)."
+  between:
+    string: "{field} must be between {min} and {max} characters."
+    number: "{field} must be between {min} and {max}."
+    array: "{field} must contain between {min} and {max} item(s)."
+
+  # 4️⃣ String rules (pattern / format)
+  starts_with: "{field} must start with {prefix}."
+  ends_with: "{field} must end with {suffix}."
+  regex: "{field} format is invalid."
+  email: "{field} must be a valid email address."
+  url: "{field} must be a valid URL."
+
+  # 5️⃣ Format / Type identifiers
+  uuid: "{field} must be a valid UUID."
+  cuid: "{field} must be a valid CUID."
+  cuid2: "{field} must be a valid CUID2."
+  ulid: "{field} must be a valid ULID."
+  datetime: "{field} must be a valid date and time."
+  ip: "{field} must be a valid IP address."
+  date_format: "{field} must be in a valid date format."
+
+  # 6️⃣ Number rules (comparison / sign / properties)
+  integer: "{field} must be an integer."
+  gt:
+    number: "{field} must be greater than {gt}."
+  gtfield: "{field} must be greater than or after {param}."
+  gte:
+    number: "{field} must be greater than or equal to {gte}."
+  gtefield: "{field} must be greater than or equal to, or on or after {param}."
+  lt:
+    number: "{field} must be less than {lt}."
+  ltfield: "{field} must be less than or before {param}."
+  lte:
+    number: "{field} must be less than or equal to {lte}."
+  ltefield: "{field} must be less than or equal to, or on or before {param}."
+  positive:
+    number: "{field} must be greater than 0."
+  nonnegative:
+    number: "{field} must be 0 or greater."
+  negative:
+    number: "{field} must be less than 0."
+  nonpositive:
+    number: "{field} must be 0 or less."
+  multiple_of: "{field} must be a multiple of {multipleOf}."
+  finite: "{field} must be a finite number."
+  safe_integer: "{field} must be within the safe integer range."
+  nan: "{field} could not be interpreted as a number."
+
+  # 7️⃣ Array rules
+  includes: "{field} must include {value}."
+  excludes: "{field} must not include {value}."
+  distinct: "{field} must not contain duplicate values."
+
+  # 8️⃣ Date / Time
+  after: "{field} must be after {date}."
+  before: "{field} must be before {date}."
+
+  # 9️⃣ Enumeration / Selection
+  oneof: "{field} must be one of {values}."
+  enum: "{field} contains an invalid value."
+  in: "{field} must be one of {values}."
+  not_in: "{field} contains an invalid selection."
+  invalid: "{field} is invalid."
+
+  # 🔟 Cross-field
+  same: "{field} does not match {other}."
+  different: "{field} must be different from {other}."
+
+  # 11️⃣ Character classes / Whitespace / Trim
+  alpha: "{field} must contain only letters."
+  alpha_num: "{field} must contain only alphanumeric characters."
+  numeric: "{field} must contain only digits."
+  no_whitespace: "{field} cannot contain whitespace."
+  trim: "Please remove leading and trailing spaces from {field}."
+
+  # 12️⃣ Coordinates (address form)
+  latitude_range: "{field} must be within -90 to 90."
+  longitude_range: "{field} must be within -180 to 180."
+
+# 13️⃣ Custom / Domain-specific rules
+custom:
+  no_edge_spaces: "Do not include spaces at the beginning or end of {field}."
+  passwd_strong: "{field} must include at least three of uppercase letters, lowercase letters, numbers, and symbols, and be at least {min} characters long."
+  jp_pref: "{field} must be a valid Japanese prefecture name."
+  jp_postal: "{field} must be a 7-digit postal code with a hyphen (e.g. 123-4567)."
+  katakana_only: "{field} must be entered in full-width Katakana characters."
+  coord_pair: "Latitude and longitude must either both be entered or both be left blank."
+  jp_pref_required: "If the country is Japan, {field} is required."

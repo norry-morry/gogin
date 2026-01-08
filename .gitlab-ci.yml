@@ -1,46 +1,127 @@
-stages:
-  - pre-build
-#- build
-  - test
-  - deploy
-#- review
-#- dast
-#- staging
-#- canary
-#- production
-#- incremental rollout 10%
-#- incremental rollout 25%
-#- incremental rollout 50%
-#- incremental rollout 100%
-#- performance
-#- cleanup
+image: golang:1.25.1-alpine
 
+# region import
+include:
+  - project: "resume/cicd"
+    ref: main
+    file:
+      - "/register_env.yml"
+      - "/ssh_setup.yml"
+
+# endregion import
+
+# region 初期値
 variables:
+  GO_VERSION: "1.25.1"
   GOLANGCI_LINT_VERSION: "v1.64.8"
+  GIT_DEPTH: 1
+  PROJECT_PATH_SANITIZED: "${CI_PROJECT_NAMESPACE}_${CI_PROJECT_NAME}"
 
-# プレビルド：常に実行
-pre-build-job:
-  stage: pre-build
-  image: golang:1.24.4-alpine
+# endregion 初期値
+
+# region ステージ設定
+stages:
+  - prepare
+  - test
+  - build
+  - review
+  - deploy
+
+# endregion ステージ設定
+
+# region 共通タスク
+# === キャッシュ作成 ===
+.cache: &cache
+  cache:
+    key:
+      files:
+        - go.sum
+    paths:
+      - /go/pkg/mod
+      - /root/.cache/go-build
+      - /root/.cache/golangci-lint
+
+# === environment scope の作成・設定 ===
+register_env:
+  stage: prepare
+  extends: .register_env_base
+
+# === CI/CDの環境変数確認 ===
+envinfo:
+  stage: prepare
+  script:
+    - 'echo "Branch:           ${CI_COMMIT_REF_NAME}"'
+    - 'echo "Pipeline source:  ${CI_PIPELINE_SOURCE}"'
+    - 'echo "MR Target:        ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-<none>}"'
+  rules:
+    - when: always
+
+
+# === プレビルド：常に実行 ===
+prebuild:
+  <<: *cache
+  stage: prepare
   before_script:
     - go install github.com/google/wire/cmd/wire@latest
   script:
-    - wire ./di || true
+    - wire ./internal/di || true
   artifacts:
     paths:
-      - di/wire_gen.go
+      - internal/di/wire_gen.go
+    expire_in: 1 week
   rules:
-    - when: always  # 常に実行
+    - when: always
 
-# Lint：develop, staging, main 以外
-lint-job:
-  stage: test
-  image: golangci/golangci-lint:${GOLANGCI_LINT_VERSION}
+# endregion 共通タスク
+
+# region ssh試験
+test_ssh:
+  stage: prepare
+  extends: .ssh_setup_base
+  variables:
+    TARGET_ENV: develop
   script:
-    - echo "Running revive lint check..."
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "echo 'ssh test success'"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo echo 'sudo test success'"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo -n whoami"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo -n pwd"
+# endregion ssh試験
+
+# region テストタスク
+
+# === Lint ===
+#     develop, staging, main 以外
+lint:
+  <<: *cache
+  stage: test
+  needs: ["prebuild"]
+  variables:
+    CGO_ENABLED: "0"
+    GOFLAGS: "-mod=readonly"
+  before_script:
+    - apk add --no-cache git bash ca-certificates
+    # go toolchain はイメージ内の 1.25.1 を使う
+    - export GOTOOLCHAIN=local
+    - go env
+    - go mod download
+    - go list ./... >/dev/null
+
+    # ★ dev と同じく Go 1.25.1 で golangci-lint をビルド
+    - go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+    - export PATH="$PATH:$(go env GOPATH)/bin"
+
+    - mkdir -p /root/.cache/golangci-lint
+  script:
+    - echo "Running golangci-lint..."
     - golangci-lint --version
-    - export PATH=$PATH:/go/bin
-    - golangci-lint run --config .golangci.yml --out-format junit-xml ./... > lint-report.xml
+    # .golangci.yml の設定を使って lint + junit 出力
+    # （config 側で output.formats に junit-xml: lint-report.xml が定義されている前提）
+    #    - golangci-lint run --timeout=5m --config .golangci.yml ./... || true
+    - golangci-lint run --timeout=5m --config .golangci.yml ./...
+    # もし CLI 側でも明示したいなら ↓ にしてもOK
+  #    - golangci-lint run --timeout=5m --config .golangci.yml --out-format junit-xml:lint-report.xml ./... || true
+  #    - golangci-lint run --timeout=5m --config .golangci.yml --out-format junit-xml:lint-report.xml ./...
+
   artifacts:
     when: always
     reports:
@@ -53,57 +134,163 @@ lint-job:
     - if: '$CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
       when: always
 
-# Unit Test：develop, staging, main 以外
-unit-test-job:
+# === Unit Test ===
+#     develop, staging, main 以外
+unittest:
+  <<: *cache
   stage: test
-  image: golang:1.24.4-alpine
+  needs: ["prebuild"]
+  variables:
+    CGO_ENABLED: "1"
   before_script:
+    - apk add --no-cache lcov bash coreutils build-base sqlite-dev
     - go install gotest.tools/gotestsum@latest
-    - go install github.com/t-yuki/gocover-cobertura@latest
+    # - go install github.com/t-yuki/gocover-cobertura@latest   # ← 削除（壊れてる）
   script:
-    - go mod tidy
-    - gotestsum --junitfile unit-test-report.xml -- -coverprofile=coverage.out ./...
-    - gocover-cobertura < coverage.out > coverage.xml
+    - go mod download
+    - gotestsum --junitfile unit-test-report.xml -- -coverprofile=coverage.out -coverpkg=resume/internal/...  ./tests/unit/...
+    - |
+      echo "" > coverage.lcov
+      while read -r line; do
+        case "$line" in
+          "mode:"*) continue ;;
+          *)
+            file=$(echo "$line" | cut -d ':' -f 1 | sed 's|^resume/||')
+            data=$(echo "$line" | cut -d ':' -f 2)
+            start_line=$(echo "$data" | cut -d ' ' -f 1 | cut -d ',' -f 1 | cut -d '.' -f 1)
+            end_line=$(echo "$data" | cut -d ' ' -f 1 | cut -d ',' -f 2 | cut -d '.' -f 1)
+            count=$(echo "$data" | cut -d ' ' -f 3)
+            echo "TN:" >> coverage.lcov
+            echo "SF:$file" >> coverage.lcov
+            for i in $(seq "$start_line" "$end_line"); do
+              echo "DA:$i,$count" >> coverage.lcov
+            done
+            echo "end_of_record" >> coverage.lcov
+            ;;
+        esac
+      done < coverage.out
+    # デバッグしたければ一時的に
+    - head -n 20 coverage.out
+    - head -n 40 coverage.lcov
+  #    - mkdir -p coverage
+  #    - genhtml -o coverage coverage.lcov
   artifacts:
+    when: always
     reports:
       junit: unit-test-report.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
     paths:
+      - unit-test-report.xml
       - coverage.out
-      - coverage.html
+      - coverage.lcov
+  #      - coverage/
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
     - if: '$CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
       when: always
 
+# === コードカバレッジ ===
+coverage:
+  stage: deploy
+  needs:
+    - job: unittest
+      artifacts: true
+  before_script:
+    - apk add --no-cache lcov
+  script:
+    - echo "=== mount check ==="
+    - mkdir -p /var/coverage || true
+    - mount | grep /var/coverage || echo "NOT MOUNTED"
+    - DEST="/var/coverage/${PROJECT_PATH_SANITIZED}"
+    - echo "DEST=$DEST"
+
+    # 1. マウントしている /var/coverage を毎回空にする
+    - rm -rf "$DEST"
+    - mkdir -p "$DEST"
+
+    # 0. coverage.lcov に中身がない場合はスキップ
+    - |
+      if ! grep -q "^SF:" coverage.lcov; then
+        echo "No coverage data found in coverage.lcov. Skipping genhtml."
+        exit 0
+      fi
+
+    # 0.5 internal/di/wire_gen.go のレコードを coverage.lcov から削除
+    #     （SF:internal/di/wire_gen.go ～ end_of_record までを丸ごと落とす）
+    - |
+      awk '
+        /^SF:internal\/di\/wire_gen.go$/ { skip=1 }   # wire_gen.go のレコード開始
+        skip && /^end_of_record$/ { skip=0; next }    # レコード終端を読んで skip 終了
+        skip { next }                                 # skip 中の行は出力しない
+        { print }                                     # それ以外はそのまま出力
+      ' coverage.lcov > coverage.filtered.lcov
+      mv coverage.filtered.lcov coverage.lcov
+
+    # 2. coverage.lcov から HTML 生成（source エラーは念のため無視）
+    - genhtml coverage.lcov -o "$DEST" --ignore-errors source
+
+  # artifacts は /var/coverage 以下なので削ったままでOK（マウント先に直接出す運用）
+  #  artifacts:
+  #    when: always
+  #    paths:
+  #      - "/var/coverage/$PROJECT_PATH_SANITIZED"
+  #    expire_in: 7 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+      when: always
+  tags:
+    - instance-runner
+
+# endregion テストタスク
+
+# region ビルド設定
+# endregion ビルド設定
+
+# region ビルドジョブ
+# endregion ビルドジョブ
+
+# region デプロイ設定
 # 共通デプロイジョブ：develop/staging/main用
-deploy-job:
+deploy:
   stage: deploy
   script:
     - echo "Deploying branch - $CI_COMMIT_BRANCH"
-#    - echo "Target Host - $DEPLOY_TARGET"
+    - echo "Target Host - $DEPLOY_TARGET"
 #    - echo "Using ENV - $APP_ENV"
 #    - ssh user@$DEPLOY_TARGET "deploy-command --env=$APP_ENV"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
     - if: '$CI_COMMIT_BRANCH == "develop"'
-#      variables:
+      variables:
+        DEPLOY_TARGET: "develop_deploy"
+        APP_ENV: "develop_app"
 #        DEPLOY_TARGET: $DEV_DEPLOY_TARGET
 #        APP_ENV: $DEV_APP_ENV
       when: always
     - if: '$CI_COMMIT_BRANCH == "staging"'
-#      variables:
+      variables:
+        DEPLOY_TARGET: "staging_deploy"
+        APP_ENV: "staging_app"
 #        DEPLOY_TARGET: $STG_DEPLOY_TARGET
 #        APP_ENV: $STG_APP_ENV
       when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
-#      variables:
+      variables:
+        DEPLOY_TARGET: "main_deploy"
+        APP_ENV: "main_app"
 #        DEPLOY_TARGET: $PRD_DEPLOY_TARGET
 #        APP_ENV: $PRD_APP_ENV
       when: always
   dependencies:
-    - pre-build-job
+    - prebuild
+
+# endregion デプロイ設定
+
+# region デプロイジョブ
+# endregion デプロイジョブ
+
+after_script:
+  - 'echo "source : ${CI_PIPELINE_SOURCE} . branch : ${CI_COMMIT_BRANCH} . Backend CI/CD finished."'

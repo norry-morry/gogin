@@ -1,0 +1,71 @@
+explanation: "user_addressのエンティティに関係する辞書"
+
+entity:
+  label: "ユーザー住所"
+  placeholder: "ユーザー住所"
+id:
+  label: "ユーザー住所ID"
+  placeholder: "user_addressesテーブルのPK"
+user_id:
+  label: ユーザーID
+  placeholder: "紐付くusersテーブルのPK"
+purpose_id:
+  label: 住所用途
+  placeholder: "紐付くaddress_purposeテーブルのPK"
+is_primary:
+  label: 代表住所フラグ
+  placeholder: "同一ユーザー×用途で最大1件"
+country_code:
+  label: 国コード
+  placeholder: "例：JP"
+administrative_area:
+  label: "都道府県/州など"
+  placeholder: "第一行政区画（都道府県/州など）"
+locality:
+  label: 市区町村など
+  placeholder: "第二行政区画（市区町村など）"
+dependent_locality:
+  label: "区/町域/地区など"
+  placeholder: "第三行政区画（区/町域/地区など任意）"
+postal_code:
+  label: "郵便番号"
+  placeholder: "郵便番号（国により形式可変）"
+sorting_code:
+  label: "仕分けコード"
+  placeholder: "仕分けコード（一部の国で使用）"
+address_line1:
+  label: "番地/丁目/通り等"
+  placeholder: "住所行1（番地/丁目/通り等）"
+address_line2:
+  label: "建物名/部屋番号等"
+  placeholder: "住所行2（建物名/部屋番号等）"
+address_line3:
+  label: "予備"
+  placeholder: "住所行3（予備）"
+organization:
+  label: "会社/団体名"
+  placeholder: "宛先：会社/団体名（任意）"
+given_name:
+  label: "名"
+  placeholder: "宛名：名（任意）"
+family_name:
+  label: "姓"
+  placeholder: "宛名：姓（任意）"
+language_code:
+  label: "言語タグ"
+  placeholder: "言語タグ（BCP47: ja-JP/en-US 等）"
+latitude:
+  label: "緯度"
+  placeholder: "緯度"
+longitude:
+  label: "経度"
+  placeholder: "経度"
+primary_flag:
+  label: "代表一意制約用の生成列"
+  placeholder: "代表一意制約用の生成列"
+created_at:
+  label: 作成日時
+  placeholder: "自動設定されます"
+updated_at:
+  label: 更新日時
+  placeholder: "自動設定されます"

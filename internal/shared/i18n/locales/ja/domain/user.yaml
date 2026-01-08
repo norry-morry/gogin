@@ -1,0 +1,53 @@
+explanation: "userのエンティティに関係する辞書"
+
+entity:
+  label: "ユーザー"
+  placeholder: "ユーザー"
+
+id:
+  label: ユーザーID
+  placeholder: "usersテーブルのPK"
+
+uid:
+  label: Firebase UID
+  placeholder: "Firebase UID（プロジェクト内一意）"
+
+email:
+  label: メールアドレス
+  placeholder: your.name@example.com
+
+email_verified:
+  label: メールアドレスの承認
+  placeholder: "認証済みなら true がセットされます"
+
+display_name:
+  label: "画面表示名（正）"
+  placeholder: "サイト上で表示される名前"
+
+photo_url:
+  label: アバターアイコン
+  placeholder: "https://example.com/avatar.png"
+
+disabled:
+  label: 一時停止フラグ
+  placeholder: "true でログイン不可"
+
+deleted_at:
+  label: "論理削除（退会）"
+  placeholder: "退会日時が自動記録されます"
+
+last_login_at:
+  label: 最終ログイン日時
+  placeholder: "自動記録されます"
+
+created_at:
+  label: 作成日時
+  placeholder: "自動設定されます"
+
+updated_at:
+  label: 更新日時
+  placeholder: "自動設定されます"
+
+password:
+  label: パスワード
+  placeholder: "8文字以上の半角英数記号"

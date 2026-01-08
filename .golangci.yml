@@ -1,21 +1,33 @@
+# .golangci.yml — resume backend
+
 run:
-  timeout: 5m
-  tests: true
+  timeout: 10m
+  go: "1.25"
+  # wire のビルドタグを考慮（生成前でも go list が破綻しにくい）
+  build-tags:
+    - wireinject
 
 linters:
   enable:
-    - revive
-    - errcheck
-    - gofmt
-    - goimports
     - govet
     - staticcheck
-    - unused
-#  disable:
-#    - bodyclose         # 必要なら
-#    - depguard          # 必要なら
+    - revive
+    - errcheck
+    - gci
+  disable:
+    - gofumpt
+    - dupl
+    - gocyclo
+    - funlen
 
 linters-settings:
+  gci:
+    # import グループ: 標準→サードパーティ→自プロジェクト
+    sections:
+      - standard
+      - default
+      - prefix(resume)
+    custom-order: true
   revive:
     confidence: 0.8
     severity: warning
@@ -27,36 +39,36 @@ linters-settings:
       - name: var-naming
       - name: package-comments
       - name: unhandled-error
-
   errcheck:
     check-type-assertions: true
     check-blank: true
-
   gofmt:
     simplify: true
-
-  staticcheck:
-    checks: ["all"]  # 必要なら ["SA*", "ST*"] に絞る
+  gofumpt:
+    extra-rules: true
 
 issues:
   exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0
-
-  # 特定のメッセージやファイルパスで除外する場合
+  # ファイル／ディレクトリ単位の除外は exclude-files（※文字列の配列でOK）
+  exclude-files:
+    - ^internal/di/wire_gen\.go$
+    - ^tmp/
+    - ^vendor/
+  # ルール単位の除外は exclude-rules（※オブジェクトの配列が必要）
+  # 例：特定ファイルで revive の「unhandled-error」だけ無視したい
   exclude-rules:
-    - path: _test\.go
-      linters:
-        - revive
-    - text: "cyclomatic complexity"
-      linters:
-        - revive
-        - gocyclo
-    - text: "should have comment or be unexported"
-      linters:
-        - revive
+    - path: internal/adapter/gateway/firebase/client\.go
+      linters: [revive]
+      text: Unhandled error in call to function os\.Setenv
+    - path: internal/domain/repository/.*_repository_interface\.go
+      linters: [gofumpt]
+    - path: internal/adapter/gateway/db/.*_repository_impl\.go
+      linters: [gofumpt]
 
 output:
+  # GitLab で JUnit を収集、ローカルはカラー行表示
   formats:
-    - junit-xml
-    - colored-line-number
+    - format: junit-xml
+      path: lint-report.xml
+    - format: colored-line-number
+

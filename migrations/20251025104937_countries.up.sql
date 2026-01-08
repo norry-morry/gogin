@@ -1,0 +1,13 @@
+CREATE TABLE countries (
+    code CHAR(2) NOT NULL COMMENT 'ISO 3166-1 alpha-2 コード',
+    is_supported TINYINT(1) NOT NULL DEFAULT 1 COMMENT '利用可フラグ',
+    sort_order INT NOT NULL DEFAULT 1000 COMMENT '並び順',
+    phone_code VARCHAR(8) NULL COMMENT '国際電話コード（例: +81）',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (code)
+)
+    ENGINE=InnoDB
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_unicode_ci
+    COMMENT='国マスタ';

@@ -1,0 +1,12 @@
+explanation: "ダイアログとかエラーメッセージで使うメッセージの辞書"
+confirm:
+  simple: "Do you want to {action}?"
+  with: "Do you want to {action} {label}?"
+
+done:
+  simple: "{action} completed."
+  with: "{label} has been {action}d."
+
+failed:
+  simple: "Failed to {action}."
+  with: "Failed to {action} {label}."

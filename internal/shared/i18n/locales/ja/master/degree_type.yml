@@ -1,0 +1,8 @@
+explanation: "学位マスタのレコード辞書"
+high_school: "高校"
+vocational: "専門学校"
+junior_college: "短期大学"
+bachelor: "学士"
+master: "修士"
+doctor: "博士"
+other: "その他"
