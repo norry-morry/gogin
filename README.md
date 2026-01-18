@@ -105,18 +105,18 @@ cd /go/src && go run cmd/migrate/main.go seeddrop
 ## lintの実行
 ```shell
 # lintの実行は
-golangci-lint run --config .golangci.yml --out-format junit-xml ./... > lint-report.xml
+golangci-lint run --config .golangci.yml --out-format junit-xml ./... > ./artifacts/lint-report.xml
 ## で行えます。テスト結果はバックエンドのルートディレクトリに lint-report.xml が生成されます
 ```
 
 # unittestの実行は
 ```shell
 ## UT、integrationテストも行う場合
-gotestsum --junitfile unit-test-report.xml -- -coverprofile=coverage.out ./...
+gotestsum --junitfile ./artifacts/unit-test-report.xml -- -coverprofile=./artifacts/coverage.out ./...
 ## UTのみ行う場合
-gotestsum --junitfile unit-test-report.xml -- -coverprofile=coverage.out ./tests/unit/...
+gotestsum --junitfile ./artifacts/unit-test-report.xml -- -coverprofile=./artifacts/coverage.out ./tests/unit/...
 ## featureのみ行う場合
-gotestsum --junitfile unit-test-report.xml -- -coverprofile=coverage.out ./tests/feature/...
+gotestsum --junitfile ./artifacts/unit-test-report.xml -- -coverprofile=./artifacts/coverage.out ./tests/feature/...
 ```
 
 ## ビルドが通らなかったときのコマンド
