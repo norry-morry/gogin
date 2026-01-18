@@ -1,0 +1,3 @@
+explanation: "ボタンのラベル辞書"
+simple: "{field} {action}"
+with: "{field}を{action}"

@@ -1,0 +1,10 @@
+explanation: "ダイアログとかエラーメッセージで使うメッセージの辞書"
+confirm:
+  simple: "{action}しますか？"
+  with: "{label}を{action}しますか？"
+done:
+  simple: "{action}しました"
+  with: "{label}を{action}しました"
+failed:
+  simple: "{action}できませんでした"
+  with: "{label}を{action}できませんでした"

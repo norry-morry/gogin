@@ -1,0 +1,27 @@
+explanation: "Dictionary related to the user_identity entity"
+
+entity:
+  label: "User Identity"
+  placeholder: "User Identity"
+
+id:
+  label: ID
+  placeholder: "Primary key of the user_identities table"
+user_id:
+  label: User ID
+  placeholder: "Primary key of the linked users table"
+provider:
+  label: Provider
+  placeholder: "e.g. google"
+provider_user_id:
+  label: Provider User ID
+  placeholder: "e.g. firebase-auth-uid"
+provider_display_name:
+  label: Display Name at Signup
+  placeholder: "Snapshot of the display name obtained during linking (for audit)"
+email_at_signup:
+  label: Signup Email Address
+  placeholder: "e.g. user@example.com"
+created_at:
+  label: Created At
+  placeholder: "Automatically set"

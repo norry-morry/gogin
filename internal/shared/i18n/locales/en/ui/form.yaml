@@ -1,0 +1,18 @@
+explanation: "特定の画面に関係しないフォーム項目の辞書"
+required: Required
+optional: Optional
+select:
+  label: select
+  placeholder: please select
+input:
+  label: input
+  placeholder: please input
+text_area:
+  label: text area
+  placeholder: please input
+password:
+  label: password
+  placeholder: please input
+search:
+  label: search
+  placeholder: please input keyword

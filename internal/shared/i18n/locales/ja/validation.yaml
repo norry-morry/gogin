@@ -1,0 +1,117 @@
+explanation: "バリデーションの辞書"
+rules:
+  # 1) 必須・空要素
+  required: "{field}は必須です"
+  nonempty:
+    string: "{field}を入力してください"
+    array: "{field}を1件以上選択してください"
+
+  # 2) 型
+  type:
+    string: "{field}は文字列で指定してください"
+    number: "{field}は数値で指定してください"
+    boolean: "{field}は真偽値で指定してください"
+    date: "{field}は日付で指定してください"
+    array: "{field}は配列で指定してください"
+    object: "{field}はオブジェクトで指定してください"
+
+  # 3) 長さ・件数・範囲（※重複禁止：ここに集約）
+  len:
+    string: "{field}は{len}文字で入力してください"
+    array: "{field}は{len}件を選択してください"
+  min:
+    string: "{field}は{min}文字以上入力してください"
+    number: "{field}は{min}以上で指定してください"
+    array: "{field}は{min}件以上選択してください"
+  max:
+    string: "{field}は{max}文字以内で入力してください"
+    number: "{field}は{max}以下で指定してください"
+    array: "{field}は{max}件以下で選択してください"
+  between:
+    string: "{field}は{min}〜{max}文字で入力してください"
+    number: "{field}は{min}以上{max}以下で指定してください"
+    array: "{field}は{min}〜{max}件を選択してください"
+
+  # 4) 文字列の前後一致・形式
+  starts_with: "{field}は{prefix}で始まる必要があります"
+  ends_with: "{field}は{suffix}で終わる必要があります"
+  regex: "{field}の形式が正しくありません"
+  email: "{field}の形式が正しくありません"
+  url: "{field}は有効なURLではありません"
+
+  # 5) 形式系
+  uuid: "{field}は有効なUUIDではありません"
+  cuid: "{field}は有効なCUIDではありません"
+  cuid2: "{field}は有効なCUID2ではありません"
+  ulid: "{field}は有効なULIDではありません"
+  datetime: "{field}は有効な日時ではありません"
+  ip: "{field}は有効なIPアドレスではありません"
+  date_format: "{field}は正しい日付形式で指定してください"
+
+  # 6) 数値（大小比較・符号・性質）
+  integer: "{field}は数字で入力してください"
+  gt:
+    number: "{field}は{gt}より大きい必要があります"
+  gtfield: "{field} は {param} より大きい値、または後の日時を入力してください"
+  gte:
+    number: "{field}は{gte}以上である必要があります"
+  gtefield: "{field} は {param} 移譲の値、または日時を入力してください"
+  lt:
+    number: "{field}は{lt}より小さい必要があります"
+  ltfield: "{field} は {param} より小さい値、または前の日時を入力してください"
+  lte:
+    number: "{field}は{lte}以下である必要があります"
+  ltefield: "{field} は {param} 以下の値、または日時を入力してください"
+  positive:
+    number: "{field}は0より大きい数で指定してください"
+  nonnegative:
+    number: "{field}は0以上で指定してください"
+  negative:
+    number: "{field}は0より小さい数で指定してください"
+  nonpositive:
+    number: "{field}は0以下で指定してください"
+  multiple_of: "{field}は{multipleOf}の倍数で指定してください"
+  finite: "{field}は有限の数値で指定してください"
+  safe_integer: "{field}は安全な整数の範囲内で指定してください"
+  nan: "{field}は数値として解釈できません"
+
+  # 7) 配列（※len/min/max/between は上に集約済み）
+  includes: "{field}に{value}を含めてください"
+  excludes: "{field}に{value}を含めることはできません"
+  distinct: "{field}に重複する値は指定できません"
+
+  # 8) 日付の大小
+  after: "{field}は{date}より後の日付を指定してください"
+  before: "{field}は{date}より前の日付を指定してください"
+
+  # 9) 列挙・選択
+  oneof: "{field}は {values} のいずれかを指定してください"
+  enum: "{field}の値が不正です"
+  in: "{field}は {values} のいずれかを指定してください"
+  not_in: "{field}に無効な値が含まれています"
+  invalid: "{field}は無効な値です"
+
+  # 10) クロスフィールド
+  same: "{field}が{other}と一致しません"
+  different: "{field}は{other}と異なる必要があります"
+
+  # 11) 文字クラス・空白・トリム
+  alpha: "{field}は英字のみで入力してください"
+  alpha_num: "{field}は英数字で入力してください"
+  numeric: "{field}は数字のみで入力してください"
+  no_whitespace: "{field}に空白は使用できません"
+  trim: "{field}の先頭・末尾の空白を取り除いてください"
+
+  # 12) 座標
+  latitude_range: "{field}は-90〜90の範囲で指定してください"
+  longitude_range: "{field}は-180〜180の範囲で指定してください"
+
+# 13️⃣ Custom / Domain-specific rules
+custom:
+  no_edge_spaces: "{field}の先頭と末尾に空白を入れないでください"
+  passwd_strong: "{field}は英大文字・英小文字・数字・記号のうち3種類以上を含め、{min}文字以上にしてください"
+  jp_pref: "{field}は有効な都道府県名を指定してください"
+  jp_postal: "{field}はハイフンありの7桁（例: 123-4567）で入力してください"
+  katakana_only: "{field}は全角カタカナで入力してください"
+  coord_pair: "緯度と経度は両方とも入力するか、両方とも未入力にしてください"
+  jp_pref_required: "国が日本の場合、{field}は必須です"

@@ -1,0 +1,4 @@
+explanation: profile/addressで使う多言語化ファイル
+root:
+  title: ご住所
+  description: 経歴書・履歴書に記載する現住所やご連絡先、事務所などの住所情報

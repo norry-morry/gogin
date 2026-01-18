@@ -1,0 +1,21 @@
+explanation: "/profile/loginで使う多言語化ファイル"
+root:
+  title: Login Information
+  description: ログイン情報の概要
+section:
+  login:
+    title: Login Information
+    table:
+      id: id
+      uid: FirebaseID
+      display_name: Display Name
+      photo_url: Thumbnail
+      email: e-mail
+      email_verified: verified
+      disabled: disable
+      last_login_at: last login datetime
+      created_at: created datetime
+      updated_at: updated datetime
+      deleted_at: deleted datetime
+  identity:
+    title: プロバイダ情報情報

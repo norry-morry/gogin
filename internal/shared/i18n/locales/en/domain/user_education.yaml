@@ -1,0 +1,57 @@
+explanation: "user_educationのエンティティに関係する辞書"
+
+entity:
+  label: "Education History"
+  placeholder: "Education History"
+
+id:
+  label: "Education ID"
+  placeholder: "Table PK"
+user_id:
+  label: "User ID"
+  placeholder: "Associated users table PK"
+institution_name:
+  label: "School Name"
+  placeholder: "School Name"
+faculty_name:
+  label: "Faculty"
+  placeholder: "Faculty"
+department_name:
+  label: "Department / Major"
+  placeholder: "Department / Major"
+degree_type_id:
+  label: "Degree Type ID"
+  placeholder: "Degree Type ID"
+degree_type:
+  label: "Degree Type"
+  placeholder: "Degree Type"
+education_status_id:
+  label: "Education Status ID"
+  placeholder: "Education Status ID"
+education_status:
+  label: "Education Status"
+  placeholder: "Education Status"
+event_date:
+  label: "year and month"
+  placeholder: "yyyy-mmの形式で入力して下さい"
+enrollment_date:
+  label: "Enrollment Date"
+  placeholder: "Enrollment Date"
+graduation_date:
+  label: "Graduation Date (Expected)"
+  placeholder: "Graduation Date (Expected)"
+description:
+  label: "Notes"
+  placeholder: "Notes"
+sort_order:
+  label: "Display Order"
+  placeholder: "Display Order"
+is_public:
+  label: "Public"
+  placeholder: "Public"
+created_at:
+  label: "Created At"
+  placeholder: "Automatically set"
+updated_at:
+  label: "Updated At"
+  placeholder: "Automatically set"
