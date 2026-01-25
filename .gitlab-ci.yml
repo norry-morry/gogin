@@ -41,6 +41,15 @@ stages:
       - /root/.cache/go-build
       - /root/.cache/golangci-lint
 
+# === lint/ut、prebuildの実行に関する変更条件 ===
+.go_changes: &go_changes
+  changes:
+    - "**/*.go"
+    - "go.mod"
+    - "go.sum"
+    - "**/wire.go"
+    - "internal/di/**"
+
 # === environment scope の作成・設定 ===
 register_env:
   stage: prepare
@@ -54,7 +63,9 @@ envinfo:
     - 'echo "Pipeline source:  ${CI_PIPELINE_SOURCE}"'
     - 'echo "MR Target:        ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-<none>}"'
   rules:
-    - when: always
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: always
+    - when: never
 
 
 # === プレビルド：常に実行 ===
@@ -70,22 +81,29 @@ prebuild:
       - internal/di/wire_gen.go
     expire_in: 1 week
   rules:
-    - when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "main"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      <<: *go_changes
+      when: always
+    # 1) 任意ビルド（curl / API / 手動実行）
+    - if: '$RUN_DEPLOY == "true" && $TARGET_ENV'
+      when: on_success
+    # 2) develop、staging、mainにマージされたとき自動実行
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH =~ /^(develop|staging|main)$/'
+      when: always
+      variables:
+        TARGET_ENV: $CI_COMMIT_BRANCH
+#   99) (※暫定※後で消す) 作業時ブランチでプッシュされたときに自動実行
+#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH !~ /^(develop|staging|main)$/'
+#      when: always
+#      variables:
+#        TARGET_ENV: "develop"
+    - when: never
 
 # endregion 共通タスク
-
-# region ssh試験
-test_ssh:
-  stage: prepare
-  extends: .ssh_setup_base
-  variables:
-    TARGET_ENV: develop
-  script:
-    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "echo 'ssh test success'"
-    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo echo 'sudo test success'"
-    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo -n whoami"
-    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo -n pwd"
-# endregion ssh試験
 
 # region テストタスク
 
@@ -131,8 +149,10 @@ lint:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
-    - if: '$CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+      <<: *go_changes
       when: always
+    - when: never
 
 # === Unit Test ===
 #     develop, staging, main 以外
@@ -186,8 +206,10 @@ unittest:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
-    - if: '$CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+      <<: *go_changes
       when: always
+    - when: never
 
 # === コードカバレッジ ===
 coverage:
@@ -238,58 +260,214 @@ coverage:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
-    - if: '$CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "develop" && $CI_COMMIT_BRANCH != "staging" && $CI_COMMIT_BRANCH != "main"'
+      <<: *go_changes
       when: always
-  tags:
-    - instance-runner
+    - when: never
 
 # endregion テストタスク
 
 # region ビルド設定
+# === .env の作成・設定 ===
+make_env:
+  stage: build
+  script:
+    - umask 077
+    - cp "$APP_ENV" .env
+    - chmod 600 .env
+  variables:
+    TARGET_ENV: "develop"
+  environment:
+    name: $TARGET_ENV
+  artifacts:
+    expire_in: 1hour
+    paths:
+      - .env
+  rules:
+    # 1) 任意ビルド（curl / API / 手動実行）
+    - if: '$RUN_DEPLOY == "true" && $TARGET_ENV'
+      when: on_success
+    # 2) develop、staging、mainにマージされたとき自動実行
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH =~ /^(develop|staging|main)$/'
+      when: always
+      variables:
+        TARGET_ENV: $CI_COMMIT_BRANCH
+    # 99) (※暫定※後で消す) 作業時ブランチでプッシュされたときに自動実行
+#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH !~ /^(develop|staging|main)$/'
+#      when: always
+#      variables:
+#        TARGET_ENV: "develop"
+    - when: never
+
+# === Firebaseの鍵情報作成 ===
+make_credential:
+  stage: build
+  script:
+    - umask 077
+    - mkdir -p secrets
+    - printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > secrets/firebase-sa.json
+    - chmod 600 secrets/firebase-sa.json
+  variables:
+    TARGET_ENV: "develop"
+  environment:
+    name: $TARGET_ENV
+  artifacts:
+    expire_in: 1hour
+    paths:
+      - secrets/firebase-sa.json
+  rules:
+    # 1) 任意ビルド（curl / API / 手動実行）
+    - if: '$RUN_DEPLOY == "true" && $TARGET_ENV'
+      when: on_success
+    # 2) develop、staging、mainにマージされたとき自動実行
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH =~ /^(develop|staging|main)$/'
+      when: always
+      variables:
+        TARGET_ENV: $CI_COMMIT_BRANCH
+    # 99) (※暫定※後で消す) 作業時ブランチでプッシュされたときに自動実行
+#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH !~ /^(develop|staging|main)$/'
+#      when: always
+#      variables:
+#        TARGET_ENV: "develop"
+    - when: never
+
 # endregion ビルド設定
 
 # region ビルドジョブ
+build:
+  stage: build
+  image: golang:1.25.1-alpine
+  needs:
+    - job: prebuild
+      artifacts: true
+    - job: make_env
+      artifacts: true
+  rules:
+    # 1) 任意ビルド（curl / API / 手動実行）
+    - if: '$RUN_DEPLOY == "true" && $TARGET_ENV'
+      when: on_success
+    # 2) develop、staging、mainにマージされたとき自動実行
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH =~ /^(develop|staging|main)$/'
+      when: always
+      variables:
+        TARGET_ENV: $CI_COMMIT_BRANCH
+    # 99) (※暫定※後で消す) 作業時ブランチでプッシュされたときに自動実行
+#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH !~ /^(develop|staging|main)$/'
+#      when: always
+#      variables:
+#        TARGET_ENV: "develop"
+    - when: never
+  script:
+    - mkdir -p bin
+    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o bin/api ./cmd/api
+    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o bin/migrate ./cmd/migrate
+  artifacts:
+    paths:
+      - bin/api
+      - bin/migrate
+      - migrations/
+    expire_in: 1hour
+
 # endregion ビルドジョブ
 
 # region デプロイ設定
-# 共通デプロイジョブ：develop/staging/main用
-deploy:
+# === sshの接続確認 ===
+#     デプロイ前にデプロイ先にsshが繋がることを確認
+check_ssh:
   stage: deploy
+  extends: .ssh_setup_base
+  variables:
+    TARGET_ENV: develop
   script:
-    - echo "Deploying branch - $CI_COMMIT_BRANCH"
-    - echo "Target Host - $DEPLOY_TARGET"
-#    - echo "Using ENV - $APP_ENV"
-#    - ssh user@$DEPLOY_TARGET "deploy-command --env=$APP_ENV"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "echo 'ssh test success'"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo echo 'sudo test success'"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo -n whoami"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "sudo -n pwd"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-      variables:
-        DEPLOY_TARGET: "develop_deploy"
-        APP_ENV: "develop_app"
-#        DEPLOY_TARGET: $DEV_DEPLOY_TARGET
-#        APP_ENV: $DEV_APP_ENV
+    # 1) 任意ビルド（curl / API / 手動実行）
+    - if: '$RUN_DEPLOY == "true" && $TARGET_ENV'
+      when: on_success
+    # 2) develop、staging、mainにマージされたとき自動実行
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH =~ /^(develop|staging|main)$/'
       when: always
-    - if: '$CI_COMMIT_BRANCH == "staging"'
       variables:
-        DEPLOY_TARGET: "staging_deploy"
-        APP_ENV: "staging_app"
-#        DEPLOY_TARGET: $STG_DEPLOY_TARGET
-#        APP_ENV: $STG_APP_ENV
-      when: always
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      variables:
-        DEPLOY_TARGET: "main_deploy"
-        APP_ENV: "main_app"
-#        DEPLOY_TARGET: $PRD_DEPLOY_TARGET
-#        APP_ENV: $PRD_APP_ENV
-      when: always
-  dependencies:
-    - prebuild
+        TARGET_ENV: $CI_COMMIT_BRANCH
+    # 99) (※暫定※後で消す) 作業時ブランチでプッシュされたときに自動実行
+#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH !~ /^(develop|staging|main)$/'
+#      when: always
+#      variables:
+#        TARGET_ENV: "develop"
+    - when: never
 
 # endregion デプロイ設定
 
 # region デプロイジョブ
+# 共通デプロイジョブ：develop/staging/main用
+deploy:
+  stage: deploy
+  extends: .ssh_setup_base
+  needs:
+    - job: check_ssh
+    - job: prebuild
+      artifacts: true
+    - job: make_env
+      artifacts: true
+    - job: make_credential
+      artifacts: true
+    - job: build
+      artifacts: true
+  variables:
+    TARGET_ENV: "develop"
+  environment:
+    name: $TARGET_ENV
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    # 1) 任意ビルド（curl / API / 手動実行）
+    - if: '$RUN_DEPLOY == "true" && $TARGET_ENV'
+      when: on_success
+    # 2) develop、staging、mainにマージされたとき自動実行
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH =~ /^(develop|staging|main)$/'
+      when: always
+      variables:
+        TARGET_ENV: $CI_COMMIT_BRANCH
+    # 99) (※暫定※後で消す) 作業時ブランチでプッシュされたときに自動実行
+#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH !~ /^(develop|staging|main)$/'
+#      when: always
+#      variables:
+#        TARGET_ENV: "develop"
+    - when: never
+  script:
+    - echo "Deploying start. branch - $CI_COMMIT_BRANCH . Target ENV - $TARGET_ENV"
+
+    # デプロイ用環境変数の読込
+    - |
+      set -a
+      . "$DEPLOY_ENV"
+      set +a
+
+    # 配布先ディレクトリの作成
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $APP_PATH"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $APP_PATH/configs"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $APP_PATH/internal/shared/i18n/locales"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $CREDENTIAL_PATH"
+
+    # 1. バイナリとマイグレーション
+    - rsync -az --delete bin "$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH"
+    - rsync -az --delete migrations "$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH"
+
+    # 2. 実行に必要な設定ファイル (ソースから直接送る)
+    - rsync -az --delete configs/ "$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH/configs/"
+    - rsync -az --delete internal/shared/i18n/locales/ "$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH/internal/shared/i18n/locales/"
+
+    # 3. 生成物 (.env と Firebaseの鍵)
+    - scp .env "$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH/.env"
+    - rsync -az --delete secrets "$DEPLOY_USER@$DEPLOY_HOST:$CREDENTIAL_PATH"
+
+    - echo "Deploying finish. branch - $CI_COMMIT_BRANCH . Target ENV - $TARGET_ENV"
+
 # endregion デプロイジョブ
 
 after_script:
