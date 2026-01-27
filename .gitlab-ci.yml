@@ -16,6 +16,10 @@ variables:
   GOLANGCI_LINT_VERSION: "v1.64.8"
   GIT_DEPTH: 1
   PROJECT_PATH_SANITIZED: "${CI_PROJECT_NAMESPACE}_${CI_PROJECT_NAME}"
+  GOTOOLCHAIN: "local"
+  GOMODCACHE: "$CI_PROJECT_DIR/.cache/gomod"
+  GOCACHE: "$CI_PROJECT_DIR/.cache/gobuild"
+  CACHE_BUSTER: "v20260127-1"
 
 # endregion 初期値
 
@@ -33,12 +37,10 @@ stages:
 # === キャッシュ作成 ===
 .cache: &cache
   cache:
-    key:
-      files:
-        - go.sum
+    key: "go-${CI_COMMIT_REF_SLUG}-${CACHE_BUSTER}"
     paths:
-      - /go/pkg/mod
-      - /root/.cache/go-build
+      - .cache/gomod
+      - .cache/gobuild
       - /root/.cache/golangci-lint
 
 # === lint/ut、prebuildの実行に関する変更条件 ===
@@ -72,10 +74,13 @@ envinfo:
 prebuild:
   <<: *cache
   stage: prepare
+  cache: []
   before_script:
+    - rm -rf "$GOMODCACHE/cache/download"
+    - rm -rf "$GOCACHE"
     - go install github.com/google/wire/cmd/wire@latest
   script:
-    - wire ./internal/di || true
+    - wire ./internal/di
   artifacts:
     paths:
       - internal/di/wire_gen.go
@@ -336,7 +341,7 @@ make_credential:
 # region ビルドジョブ
 build:
   stage: build
-  image: golang:1.25.1-alpine
+  cache: []
   needs:
     - job: prebuild
       artifacts: true
@@ -357,10 +362,45 @@ build:
 #      variables:
 #        TARGET_ENV: "develop"
     - when: never
+#  image: golang:1.25.1-alpine
+  image: golang:1.25.1
   script:
-    - mkdir -p bin
+    - apt-get update
+    - apt-get install -y --no-install-recommends ca-certificates git
+    - update-ca-certificates
+    - go mod download
     - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o bin/api ./cmd/api
     - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o bin/migrate ./cmd/migrate
+
+#    - apk add --no-cache ca-certificates git
+#    - mkdir -p bin
+
+    # Go toolchain はイメージ内を使う
+#    - export GOTOOLCHAIN=local
+
+    # 壊れやすいのは “download キャッシュ” なのでそこだけ「汎用的に」消す
+#    - rm -rf "$GOMODCACHE/cache/download"
+
+    # 安定寄りの取得設定（必要に応じて direct のみにも切替可）
+#    - export GOPROXY="https://proxy.golang.org"
+#    - export GOSUMDB="sum.golang.org"
+
+    # 透過プロキシ/HTTP2 起因の破損回避（まず試す価値あり）
+#    - export GODEBUG="http2client=0"
+
+    # 一時的なネットワーク破損に備えてリトライ
+#    - |
+#      set -eu
+#      go mod download || {
+#        echo "go mod download failed -> purge download cache and retry once"
+#        rm -rf "$GOMODCACHE/cache/download"   # /go/pkg/mod を使うならそのパスに
+#        go mod download
+#      }
+
+#    - export GOCACHE=/root/.cache/go-build
+#    - rm -rf "$GOCACHE"
+#    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o bin/api ./cmd/api
+#    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o bin/migrate ./cmd/migrate
   artifacts:
     paths:
       - bin/api
