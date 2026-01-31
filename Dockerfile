@@ -44,7 +44,27 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} && \
     go install mvdan.cc/gofumpt@latest
 
-# note WSL環境だからか？ディレクトリを信頼できてない見たい
+# ✅ 追加: 実行ユーザー作成（既存ならスキップするように安全に）
+ARG UID=1000
+ARG GID=1000
+ARG USERNAME=dev
+ARG GROUPNAME=dev
+
+RUN set -eux; \
+    : "${UID:=1000}"; \
+    : "${GID:=1000}"; \
+    : "${USERNAME:=dev}"; \
+    : "${GROUPNAME:=dev}"; \
+    if ! getent group "${GROUPNAME}" >/dev/null 2>&1; then \
+      addgroup -S -g "${GID}" "${GROUPNAME}" || addgroup -S "${GROUPNAME}"; \
+    fi; \
+    if ! id -u "${USERNAME}" >/dev/null 2>&1; then \
+      adduser -S -u "${UID}" -G "${GROUPNAME}" "${USERNAME}" || adduser -S -G "${GROUPNAME}" "${USERNAME}"; \
+    fi; \
+    mkdir -p "/home/${USERNAME}" /go/src /go/pkg/mod; \
+    chown -R "${UID}:${GID}" "/home/${USERNAME}" /go/src /go/pkg/mod
+
+# ✅ WSLなどで safe.directory 問題が出るなら system に入れる（ユーザー切替しても効く）
 RUN git config --global --add safe.directory /go/src
 
 WORKDIR /go/src
@@ -55,6 +75,10 @@ RUN go mod download
 
 # ソースコピー
 COPY . .
+
+# ✅ 最後に実行ユーザーへ
+ENV HOME=/home/${USERNAME}
+USER ${USERNAME}
 
 EXPOSE 8080 40000
 
