@@ -1,14 +1,3 @@
-# 必ずお読み下さい
-
-* [ローカル環境構築方法](https://rm.sstinc.jp/projects/resume_service/wiki/%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89)
-* [Git運用ルール](https://rm.sstinc.jp/projects/open/wiki/Develop_guide_gitflow)
-* [コーディング規約](https://rm.sstinc.jp/projects/resume_service/wiki/%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E8%A6%8F%E7%B4%84)
-* [フロントエンドコーディング規約](https://rm.sstinc.jp/projects/resume_service/wiki/%E3%83%95%E3%83%AD%E3%83%B3%E3%83%88%E3%82%A8%E3%83%B3%E3%83%89%E8%A6%8F%E7%B4%84)
-* [バックエンドコーディング規約](https://rm.sstinc.jp/projects/resume_service/wiki/%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E8%A6%8F%E7%B4%84)
-
-## お時間のあるときにお読み下さい
-* [Wiki運用ガイド](https://rm.sstinc.jp/projects/open/wiki/Guide)
-
 # バックエンド
 
 ## ディレクトリツリーと役割
